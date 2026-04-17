@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import '../data/mock_data.dart';
 import '../models/models.dart';
 import 'word_card_screen.dart';
@@ -126,12 +127,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 final category = MockData.categories[index];
                 return InkWell(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CategoryWordsScreen(category: category),
-                      ),
-                    );
+                    if (category.subcategories.isNotEmpty) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SubcategoryScreen(category: category),
+                        ),
+                      );
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CategoryWordsScreen(category: category),
+                        ),
+                      );
+                    }
                   },
                   child: Card(
                     elevation: 2,
@@ -146,6 +156,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 );
               },
+            ),
+            const SizedBox(height: 24),
+            Card(
+              color: Colors.blue.shade100,
+              child: ListTile(
+                leading: const Icon(Icons.chat, color: Colors.blue, size: 32),
+                title: const Text('Quick Phrases', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                subtitle: const Text('Learn common sentences quickly'),
+                trailing: const Icon(Icons.arrow_forward_ios),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const PhrasesScreen()));
+                },
+              ),
             ),
             const SizedBox(height: 24),
             const Text(
@@ -211,17 +234,61 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class CategoryWordsScreen extends StatelessWidget {
+class SubcategoryScreen extends StatelessWidget {
   final Category category;
 
-  const CategoryWordsScreen({super.key, required this.category});
+  const SubcategoryScreen({super.key, required this.category});
 
   @override
   Widget build(BuildContext context) {
-    final words = MockData.words.where((w) => w.categoryId == category.id).toList();
+    return Scaffold(
+      appBar: AppBar(title: Text('${category.icon} ${category.name} - Subcategories')),
+      body: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: category.subcategories.length,
+        itemBuilder: (context, index) {
+          final sub = category.subcategories[index];
+          return Card(
+            child: ListTile(
+              leading: Text(sub.icon, style: const TextStyle(fontSize: 24)),
+              title: Text(sub.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CategoryWordsScreen(category: category, subcategory: sub),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class CategoryWordsScreen extends StatelessWidget {
+  final Category category;
+  final Subcategory? subcategory;
+
+  const CategoryWordsScreen({super.key, required this.category, this.subcategory});
+
+  @override
+  Widget build(BuildContext context) {
+    final words = MockData.words.where((w) {
+      bool matchCat = w.categoryId == category.id;
+      if (subcategory != null) {
+        return matchCat && w.subcategoryId == subcategory!.id;
+      }
+      return matchCat;
+    }).toList();
+
+    String title = subcategory != null ? '${subcategory!.icon} ${subcategory!.name}' : '${category.icon} ${category.name}';
 
     return Scaffold(
-      appBar: AppBar(title: Text('${category.icon} ${category.name}')),
+      appBar: AppBar(title: Text(title)),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: words.length,
@@ -242,6 +309,87 @@ class CategoryWordsScreen extends StatelessWidget {
                   ),
                 );
               },
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class PhrasesScreen extends StatefulWidget {
+  const PhrasesScreen({super.key});
+
+  @override
+  State<PhrasesScreen> createState() => _PhrasesScreenState();
+}
+
+class _PhrasesScreenState extends State<PhrasesScreen> {
+  final FlutterTts flutterTts = FlutterTts();
+
+  @override
+  void initState() {
+    super.initState();
+    flutterTts.setLanguage("en-US");
+    flutterTts.setSpeechRate(0.5);
+  }
+
+  @override
+  void dispose() {
+    flutterTts.stop();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Quick Phrases')),
+      body: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: MockData.phrases.length,
+        itemBuilder: (context, index) {
+          final phrase = MockData.phrases[index];
+          return Card(
+            margin: const EdgeInsets.only(bottom: 16),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          phrase.english,
+                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.volume_up, color: Colors.blue),
+                        onPressed: () => flutterTts.speak(phrase.english),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(phrase.arabic, style: const TextStyle(fontSize: 18, color: Colors.grey)),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.info_outline, size: 16, color: Colors.amber),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(phrase.context, style: const TextStyle(fontSize: 14))),
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
           );
         },

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:uuid/uuid.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 import '../providers/user_provider.dart';
 import '../models/models.dart';
 
@@ -134,6 +136,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
 
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () => _exportData(userProvider),
+              icon: const Icon(Icons.download),
+              label: const Text('Export Dictionary (CSV)'),
+            ),
+
+            const SizedBox(height: 32),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Study Heatmap (Mock)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            ),
+            const SizedBox(height: 8),
+            _buildMockHeatmap(),
+
             const SizedBox(height: 32),
             if (userProvider.savedItems.isNotEmpty) ...[
               const Align(
@@ -259,6 +276,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       title: Text(name, style: TextStyle(fontWeight: isCurrentUser ? FontWeight.bold : FontWeight.normal)),
       trailing: Text('$xp XP', style: const TextStyle(fontWeight: FontWeight.bold)),
+    );
+  }
+
+  Future<void> _exportData(UserProvider userProvider) async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/my_dictionary.csv');
+
+      String csvContent = 'Word,Translation,Example\n';
+      for (var w in userProvider.customWords) {
+        csvContent += '${w.word},${w.translation},${w.example}\n';
+      }
+
+      await file.writeAsString(csvContent);
+      if(mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Exported to ${file.path}')));
+      }
+    } catch (e) {
+      if(mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to export data')));
+      }
+    }
+  }
+
+  Widget _buildMockHeatmap() {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 14,
+        crossAxisSpacing: 4,
+        mainAxisSpacing: 4,
+      ),
+      itemCount: 42, // Last 6 weeks mock
+      itemBuilder: (context, index) {
+        int intensity = (index % 5) * 50; // Mock intensity
+        return Container(
+          decoration: BoxDecoration(
+            color: intensity == 0 ? Colors.grey.shade300 : Colors.green.shade500.withOpacity(intensity / 200),
+            borderRadius: BorderRadius.circular(4),
+          ),
+        );
+      },
     );
   }
 

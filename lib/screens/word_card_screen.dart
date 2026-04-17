@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../models/models.dart';
 import '../providers/user_provider.dart';
 
@@ -15,12 +16,16 @@ class WordCardScreen extends StatefulWidget {
 
 class _WordCardScreenState extends State<WordCardScreen> {
   final FlutterTts flutterTts = FlutterTts();
+  late stt.SpeechToText _speech;
   bool _isSpeaking = false;
   bool _showAdvanced = false;
+  bool _isListening = false;
+  String _spokenText = '';
 
   @override
   void initState() {
     super.initState();
+    _speech = stt.SpeechToText();
     _initTts();
   }
 
@@ -43,6 +48,50 @@ class _WordCardScreenState extends State<WordCardScreen> {
 
   Future<void> _speak(String text) async {
     await flutterTts.speak(text);
+  }
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (val) => print('onStatus: $val'),
+        onError: (val) => print('onError: $val'),
+      );
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (val) => setState(() {
+            _spokenText = val.recognizedWords;
+            if (val.hasConfidenceRating && val.confidence > 0) {
+              _evaluateSpeech();
+            }
+          }),
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
+  }
+
+  void _evaluateSpeech() {
+    if (_spokenText.isEmpty) return;
+
+    // Simple comparison logic
+    String target = widget.word.word.toLowerCase().replaceAll(RegExp(r'[^\w\s]'), '');
+    String spoken = _spokenText.toLowerCase().replaceAll(RegExp(r'[^\w\s]'), '');
+
+    if (spoken.contains(target)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Excellent pronunciation! +10 XP'), backgroundColor: Colors.green),
+      );
+      Provider.of<UserProvider>(context, listen: false).addXp(10);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('You said: $_spokenText. Try again!'), backgroundColor: Colors.orange),
+      );
+    }
+    setState(() => _isListening = false);
+    _speech.stop();
   }
 
   @override
@@ -91,6 +140,13 @@ class _WordCardScreenState extends State<WordCardScreen> {
                 style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
               ),
             ),
+            if (widget.word.ipa.isNotEmpty)
+              Center(
+                child: Text(
+                  widget.word.ipa,
+                  style: TextStyle(fontSize: 18, color: Colors.blue.shade300, fontStyle: FontStyle.italic),
+                ),
+              ),
             Center(
               child: Text(
                 widget.word.translation,
@@ -108,15 +164,13 @@ class _WordCardScreenState extends State<WordCardScreen> {
                 ),
                 const SizedBox(width: 16),
                 OutlinedButton.icon(
-                  onPressed: () {
-                    // Mock Speech Recognition feature
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Mock Speech Eval: Pronunciation 85% Correct!')),
-                    );
-                    userProvider.addXp(10);
-                  },
-                  icon: const Icon(Icons.mic),
-                  label: const Text('Speak'),
+                  onPressed: _listen,
+                  icon: Icon(_isListening ? Icons.mic : Icons.mic_none),
+                  label: Text(_isListening ? 'Listening...' : 'Speak'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: _isListening ? Colors.red : null,
+                    side: BorderSide(color: _isListening ? Colors.red : Colors.blue),
+                  ),
                 ),
               ],
             ),

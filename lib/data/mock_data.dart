@@ -11,11 +11,59 @@ class MockData {
   ];
 
   static List<Category> categories = [
-    Category(id: 'tech', name: 'تقنية', icon: '💻'),
+    Category(
+      id: 'tech',
+      name: 'تقنية',
+      icon: '💻',
+      subcategories: [
+        Subcategory(id: 'tech_prog', categoryId: 'tech', name: 'برمجة', icon: '👨‍💻'),
+        Subcategory(id: 'tech_cyber', categoryId: 'tech', name: 'أمن سيبراني', icon: '🛡️'),
+        Subcategory(id: 'tech_ai', categoryId: 'tech', name: 'ذكاء اصطناعي', icon: '🤖'),
+      ],
+    ),
+    Category(
+      id: 'health',
+      name: 'صحة وطب',
+      icon: '⚕️',
+      subcategories: [
+        Subcategory(id: 'health_anatomy', categoryId: 'health', name: 'تشريح', icon: '🦴'),
+        Subcategory(id: 'health_pharm', categoryId: 'health', name: 'صيدلة', icon: '💊'),
+      ],
+    ),
     Category(id: 'business', name: 'أعمال', icon: '💼'),
-    Category(id: 'health', name: 'صحة', icon: '⚕️'),
     Category(id: 'travel', name: 'سفر', icon: '✈️'),
     Category(id: 'daily', name: 'حياة يومية', icon: '☀️'),
+    Category(
+      id: 'law',
+      name: 'قضاء وسياسة',
+      icon: '⚖️',
+      subcategories: [
+        Subcategory(id: 'law_court', categoryId: 'law', name: 'محاكم', icon: '🏛️'),
+        Subcategory(id: 'law_politics', categoryId: 'law', name: 'سياسة', icon: '🗳️'),
+      ],
+    ),
+    Category(
+      id: 'economy',
+      name: 'اقتصاد',
+      icon: '📈',
+    ),
+    Category(
+      id: 'food',
+      name: 'فواكه وخضار',
+      icon: '🍎',
+      subcategories: [
+        Subcategory(id: 'food_fruits', categoryId: 'food', name: 'فواكه', icon: '🍇'),
+        Subcategory(id: 'food_veg', categoryId: 'food', name: 'خضار', icon: '🥦'),
+      ],
+    ),
+  ];
+
+  static List<Phrase> phrases = [
+    Phrase(id: 'p1', english: 'Could you please speak a bit slower?', arabic: 'هل يمكنك التحدث ببطء قليلاً من فضلك؟', context: 'عندما لا تفهم شخصاً يتحدث بسرعة.'),
+    Phrase(id: 'p2', english: 'I would like to order the daily special.', arabic: 'أود أن أطلب الطبق اليومي الخاص.', context: 'في المطعم عند الطلب.'),
+    Phrase(id: 'p3', english: 'How much does this cost?', arabic: 'كم سعر هذا؟', context: 'أثناء التسوق.'),
+    Phrase(id: 'p4', english: 'Can you help me find the nearest hospital?', arabic: 'هل يمكنك مساعدتي في العثور على أقرب مستشفى؟', context: 'في حالات الطوارئ أثناء السفر.'),
+    Phrase(id: 'p5', english: 'I appreciate your help.', arabic: 'أقدر مساعدتك.', context: 'لشكر شخص ما بلباقة.'),
   ];
 
   static List<Story> stories = [
@@ -57,8 +105,24 @@ class MockData {
       emoji: '🔢',
       synonyms: ['procedure', 'routine'],
       antonyms: [],
+      ipa: '/ˈæl.ɡə.rɪ.ðəm/',
       categoryId: 'tech',
+      subcategoryId: 'tech_prog',
       levelId: 'B2',
+    ),
+    Word(
+      id: 'w_cyber',
+      word: 'Firewall',
+      translation: 'جدار حماية',
+      usage: 'A network security system that monitors and controls network traffic.',
+      example: 'The company installed a new firewall to prevent cyber attacks.',
+      emoji: '🧱',
+      synonyms: ['shield', 'barrier'],
+      antonyms: [],
+      ipa: '/ˈfaɪr.wɔːl/',
+      categoryId: 'tech',
+      subcategoryId: 'tech_cyber',
+      levelId: 'B1',
     ),
     Word(
       id: 'w2',
@@ -69,6 +133,7 @@ class MockData {
       emoji: '🤝',
       synonyms: ['discussion', 'bargaining'],
       antonyms: ['disagreement'],
+      ipa: '/nəˌɡoʊ.ʃiˈeɪ.ʃən/',
       categoryId: 'business',
       levelId: 'C1',
     ),
@@ -81,7 +146,9 @@ class MockData {
       emoji: '🤒',
       synonyms: ['sign', 'indication'],
       antonyms: [],
+      ipa: '/ˈsɪmp.təm/',
       categoryId: 'health',
+      subcategoryId: 'health_anatomy',
       levelId: 'B1',
     ),
     Word(
@@ -93,6 +160,7 @@ class MockData {
       emoji: '🗺️',
       synonyms: ['schedule', 'plan', 'route'],
       antonyms: [],
+      ipa: '/aɪˈtɪn.ə.rer.i/',
       categoryId: 'travel',
       levelId: 'B2',
     ),
@@ -105,8 +173,50 @@ class MockData {
       emoji: '🍳',
       synonyms: [],
       antonyms: ['dinner'],
+      ipa: '/ˈbrek.fəst/',
       categoryId: 'daily',
       levelId: 'A1',
+    ),
+    Word(
+      id: 'w_law',
+      word: 'Jurisdiction',
+      translation: 'اختصاص قضائي',
+      usage: 'The official power to make legal decisions and judgements.',
+      example: 'The court has no jurisdiction in this case.',
+      emoji: '⚖️',
+      synonyms: ['authority', 'control'],
+      antonyms: [],
+      ipa: '/ˌdʒʊr.ɪsˈdɪk.ʃən/',
+      categoryId: 'law',
+      subcategoryId: 'law_court',
+      levelId: 'C1',
+    ),
+    Word(
+      id: 'w_econ',
+      word: 'Inflation',
+      translation: 'تضخم اقتصادي',
+      usage: 'A general increase in prices and fall in the purchasing value of money.',
+      example: 'High inflation is affecting the cost of living.',
+      emoji: '📈',
+      synonyms: ['expansion', 'increase'],
+      antonyms: ['deflation'],
+      ipa: '/ɪnˈfleɪ.ʃən/',
+      categoryId: 'economy',
+      levelId: 'B2',
+    ),
+    Word(
+      id: 'w_veg',
+      word: 'Broccoli',
+      translation: 'بروكلي',
+      usage: 'A cultivated variety of cabbage bearing heads of green or purplish flower buds.',
+      example: 'I like to eat steamed broccoli for dinner.',
+      emoji: '🥦',
+      synonyms: [],
+      antonyms: [],
+      ipa: '/ˈbrɑː.kəl.i/',
+      categoryId: 'food',
+      subcategoryId: 'food_veg',
+      levelId: 'A2',
     ),
   ];
 }

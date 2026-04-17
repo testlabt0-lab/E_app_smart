@@ -7,7 +7,9 @@ class Word {
   final String emoji;
   final List<String> synonyms;
   final List<String> antonyms;
+  final String ipa;
   final String categoryId;
+  final String subcategoryId;
   final String levelId;
 
   Word({
@@ -17,9 +19,11 @@ class Word {
     required this.usage,
     required this.example,
     required this.emoji,
+    this.ipa = '',
     required this.synonyms,
     required this.antonyms,
     required this.categoryId,
+    this.subcategoryId = '',
     required this.levelId,
   });
 
@@ -31,9 +35,11 @@ class Word {
       usage: json['usage'],
       example: json['example'],
       emoji: json['emoji'],
+      ipa: json['ipa'] ?? '',
       synonyms: List<String>.from(json['synonyms']),
       antonyms: List<String>.from(json['antonyms']),
       categoryId: json['categoryId'],
+      subcategoryId: json['subcategoryId'] ?? '',
       levelId: json['levelId'],
     );
   }
@@ -46,23 +52,55 @@ class Word {
       'usage': usage,
       'example': example,
       'emoji': emoji,
+      'ipa': ipa,
       'synonyms': synonyms,
       'antonyms': antonyms,
       'categoryId': categoryId,
+      'subcategoryId': subcategoryId,
       'levelId': levelId,
     };
   }
+}
+
+class Subcategory {
+  final String id;
+  final String categoryId;
+  final String name;
+  final String icon;
+
+  Subcategory({
+    required this.id,
+    required this.categoryId,
+    required this.name,
+    required this.icon,
+  });
 }
 
 class Category {
   final String id;
   final String name;
   final String icon;
+  final List<Subcategory> subcategories;
 
   Category({
     required this.id,
     required this.name,
     required this.icon,
+    this.subcategories = const [],
+  });
+}
+
+class Phrase {
+  final String id;
+  final String english;
+  final String arabic;
+  final String context;
+
+  Phrase({
+    required this.id,
+    required this.english,
+    required this.arabic,
+    required this.context,
   });
 }
 
