@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'dart:async';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../data/mock_data.dart';
@@ -290,7 +291,6 @@ class _WordMatchGameState extends State<WordMatchGame> {
 }
 
 // Time Attack Game
-import 'dart:async';
 
 class TimeAttackGame extends StatefulWidget {
   const TimeAttackGame({super.key});

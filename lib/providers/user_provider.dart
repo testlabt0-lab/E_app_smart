@@ -7,12 +7,14 @@ class UserProvider with ChangeNotifier {
   int _xp = 0;
   int _streak = 0;
   List<SavedItem> _savedItems = [];
+  List<Word> _customWords = [];
   bool _isDarkMode = false;
   String _lastLoginDate = DateTime.now().toIso8601String().split('T')[0];
 
   int get xp => _xp;
   int get streak => _streak;
   List<SavedItem> get savedItems => _savedItems;
+  List<Word> get customWords => _customWords;
   bool get isDarkMode => _isDarkMode;
 
   UserProvider() {
@@ -28,6 +30,9 @@ class UserProvider with ChangeNotifier {
 
     final savedItemsJson = prefs.getStringList('savedItems') ?? [];
     _savedItems = savedItemsJson.map((e) => SavedItem.fromJson(json.decode(e))).toList();
+
+    final customWordsJson = prefs.getStringList('customWords') ?? [];
+    _customWords = customWordsJson.map((e) => Word.fromJson(json.decode(e))).toList();
 
     _checkStreak();
     notifyListeners();
@@ -94,9 +99,27 @@ class UserProvider with ChangeNotifier {
     }
   }
 
+  void addCustomWord(Word word) async {
+    _customWords.add(word);
+    notifyListeners();
+    _saveCustomWordsToPrefs();
+  }
+
+  void removeCustomWord(String wordId) async {
+    _customWords.removeWhere((item) => item.id == wordId);
+    notifyListeners();
+    _saveCustomWordsToPrefs();
+  }
+
   Future<void> _saveItemsToPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     final jsonList = _savedItems.map((item) => json.encode(item.toJson())).toList();
     prefs.setStringList('savedItems', jsonList);
+  }
+
+  Future<void> _saveCustomWordsToPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonList = _customWords.map((item) => json.encode(item.toJson())).toList();
+    prefs.setStringList('customWords', jsonList);
   }
 }
