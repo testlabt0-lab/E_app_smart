@@ -5,11 +5,33 @@ import 'package:google_fonts/google_fonts.dart';
 import 'providers/user_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/practice_screen.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 import 'screens/games_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/ai_pro_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final storage = const FlutterSecureStorage();
+  final auth = LocalAuthentication();
+
+  String? isBiometric = await storage.read(key: 'biometric_enabled');
+  if (isBiometric == 'true') {
+    bool canAuthenticate = await auth.canCheckBiometrics || await auth.isDeviceSupported();
+    if (canAuthenticate) {
+      bool authenticated = false;
+      while (!authenticated) {
+        authenticated = await auth.authenticate(
+          localizedReason: 'Please authenticate to open EFA Pro',
+          options: const AuthenticationOptions(stickyAuth: true, biometricOnly: false),
+        );
+      }
+    }
+  }
+
   runApp(
     MultiProvider(
       providers: [

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-// IMPORTANT: The user must replace this with their actual Gemini or OpenAI API Key
-const String API_KEY = "YOUR_API_KEY_HERE";
+import 'dart:math';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AiProScreen extends StatelessWidget {
   const AiProScreen({super.key});
@@ -111,9 +110,27 @@ class AiChatScreen extends StatefulWidget {
 
 class _AiChatScreenState extends State<AiChatScreen> {
   final TextEditingController _controller = TextEditingController();
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  String _apiKey = '';
+
   final List<Map<String, String>> _messages = [
     {"role": "ai", "text": "Hello! I am your AI language partner. Let's practice! Imagine we are at a restaurant and I am the waiter. What would you like to order?"}
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadApiKey();
+  }
+
+  Future<void> _loadApiKey() async {
+    String? key = await _secureStorage.read(key: 'ai_api_key');
+    if (mounted) {
+      setState(() {
+        _apiKey = key ?? '';
+      });
+    }
+  }
 
   void _sendMessage() {
     if (_controller.text.isEmpty) return;
@@ -129,10 +146,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
     Future.delayed(const Duration(seconds: 1), () {
       if(mounted) {
         setState(() {
-          if (API_KEY == "YOUR_API_KEY_HERE") {
-             _messages.add({"role": "ai", "text": "[API KEY REQUIRED] I received: '$userText'. Please add your Gemini/OpenAI API key in the source code to enable real responses!"});
+          if (_apiKey.isEmpty) {
+             _messages.add({"role": "ai", "text": "[API KEY REQUIRED] I received: '$userText'. Please save your Gemini/OpenAI API key securely in Settings to enable real responses!"});
           } else {
-             _messages.add({"role": "ai", "text": "That sounds delicious! Would you like anything to drink with that?"});
+             _messages.add({"role": "ai", "text": "That sounds delicious! Would you like anything to drink with that? (Simulated response using secure key: ${_apiKey.substring(0, min(5, _apiKey.length))}...)"});
           }
         });
       }
@@ -170,11 +187,11 @@ class _AiChatScreenState extends State<AiChatScreen> {
               },
             ),
           ),
-          if (API_KEY == "YOUR_API_KEY_HERE")
+          if (_apiKey.isEmpty)
             Container(
               padding: const EdgeInsets.all(8),
               color: Colors.red.shade100,
-              child: const Text('Warning: AI Features require a valid API Key to be set in ai_pro_screen.dart', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+              child: const Text('Warning: AI Features require a valid API Key to be set in Settings.', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
             ),
           Padding(
             padding: const EdgeInsets.all(8.0),

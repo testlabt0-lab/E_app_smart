@@ -5,6 +5,7 @@ import '../models/models.dart';
 import 'word_card_screen.dart';
 
 import 'story_reading_screen.dart';
+import 'translator_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -104,6 +105,19 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   );
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+            Card(
+              color: Colors.purple.shade100,
+              child: ListTile(
+                leading: const Icon(Icons.translate, color: Colors.purple, size: 32),
+                title: const Text('Smart Translator', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                subtitle: const Text('Translate text instantly (EN/AR)'),
+                trailing: const Icon(Icons.arrow_forward_ios),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const TranslatorScreen()));
                 },
               ),
             ),

@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import '../providers/user_provider.dart';
 import '../models/models.dart';
+import 'settings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -102,6 +103,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           IconButton(
             icon: Icon(userProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode),
             onPressed: () => userProvider.toggleTheme(),
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
+            },
           ),
         ],
       ),
