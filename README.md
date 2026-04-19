@@ -1,17 +1,9 @@
-# efa_pro
+# EFA Pro - English Fluency Academy Pro
+A comprehensive offline-first English learning Flutter app.
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Features
+- **Gamification:** Word scramble, Match, Time Attack.
+- **Spaced Repetition:** Flashcards gym with interval algorithm.
+- **Smart Translation & Stories:** In-app translator and interactive tap-to-translate stories.
+- **Biometric Security:** Local auth lock.
+- **Pro AI:** Chat placeholders built using local secure storage for your OpenAI/Gemini API keys.

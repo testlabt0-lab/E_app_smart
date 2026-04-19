@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: efapro-web
+    env: static
+    buildCommand: flutter build web --release
+    staticPublishPath: build/web
