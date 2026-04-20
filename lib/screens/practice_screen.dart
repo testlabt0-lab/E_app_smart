@@ -10,14 +10,30 @@ class PracticeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
-    final savedWords = userProvider.savedItems.map((item) {
-      return MockData.words.firstWhere((w) => w.id == item.wordId);
+    final allWords = [...MockData.words, ...userProvider.customWords];
+
+    // Filter only items that are due for review
+    final dueItems = userProvider.savedItems.where((item) {
+      return item.nextReviewDate.isBefore(DateTime.now()) ||
+             item.nextReviewDate.isAtSameMomentAs(DateTime.now());
+    }).toList();
+
+    final savedWords = dueItems.map((item) {
+      return allWords.firstWhere((w) => w.id == item.wordId);
     }).toList();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Practice Gym - Spaced Repetition')),
       body: savedWords.isEmpty
-          ? const Center(child: Text('No words saved for practice yet.\nGo to Home and save some words!', textAlign: TextAlign.center))
+          ? Center(
+              child: Text(
+                userProvider.savedItems.isEmpty
+                  ? 'No words saved for practice yet.\nGo to Home and save some words!'
+                  : 'You are all caught up!\nCome back later for your next reviews.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 18)
+              )
+            )
           : ListView.builder(
               padding: const EdgeInsets.all(20),
               itemCount: savedWords.length,

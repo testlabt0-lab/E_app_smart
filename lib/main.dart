@@ -12,26 +12,8 @@ import 'screens/games_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/ai_pro_screen.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
-  final storage = const FlutterSecureStorage();
-  final auth = LocalAuthentication();
-
-  String? isBiometric = await storage.read(key: 'biometric_enabled');
-  if (isBiometric == 'true') {
-    bool canAuthenticate = await auth.canCheckBiometrics || await auth.isDeviceSupported();
-    if (canAuthenticate) {
-      bool authenticated = false;
-      while (!authenticated) {
-        authenticated = await auth.authenticate(
-          localizedReason: 'Please authenticate to open EFA Pro',
-          options: const AuthenticationOptions(stickyAuth: true, biometricOnly: false),
-        );
-      }
-    }
-  }
-
   runApp(
     MultiProvider(
       providers: [
@@ -42,11 +24,63 @@ void main() async {
   );
 }
 
-class EfaProApp extends StatelessWidget {
+class EfaProApp extends StatefulWidget {
   const EfaProApp({super.key});
 
   @override
+  State<EfaProApp> createState() => _EfaProAppState();
+}
+
+class _EfaProAppState extends State<EfaProApp> {
+  bool _isAuthenticated = false;
+  bool _isCheckingAuth = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkBiometricAuth();
+  }
+
+  Future<void> _checkBiometricAuth() async {
+    final storage = const FlutterSecureStorage();
+    final auth = LocalAuthentication();
+
+    String? isBiometric = await storage.read(key: 'biometric_enabled');
+    if (isBiometric == 'true') {
+      bool canAuthenticate = await auth.canCheckBiometrics || await auth.isDeviceSupported();
+      if (canAuthenticate) {
+        bool authenticated = false;
+        while (!authenticated) {
+          try {
+            authenticated = await auth.authenticate(
+              localizedReason: 'Please authenticate to open EFA Pro',
+              options: const AuthenticationOptions(stickyAuth: true, biometricOnly: false),
+            );
+          } catch (e) {
+            // Handle platform exception (e.g. app in background)
+            await Future.delayed(const Duration(seconds: 1));
+          }
+        }
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _isAuthenticated = true;
+        _isCheckingAuth = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isCheckingAuth) {
+      return const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(body: Center(child: CircularProgressIndicator())),
+      );
+    }
+
     return Consumer<UserProvider>(
       builder: (context, userProvider, child) {
         return MaterialApp(
@@ -54,19 +88,40 @@ class EfaProApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             useMaterial3: true,
+            scaffoldBackgroundColor: const Color(0xFFF3F8FF),
             colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.blueAccent,
+              seedColor: const Color(0xFF6A11CB),
+              primary: const Color(0xFF6A11CB),
+              secondary: const Color(0xFF2575FC),
               brightness: Brightness.light,
             ),
-            textTheme: GoogleFonts.cairoTextTheme(ThemeData.light().textTheme),
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              centerTitle: true,
+              iconTheme: IconThemeData(color: Color(0xFF2B2D42)),
+              titleTextStyle: TextStyle(color: Color(0xFF2B2D42), fontSize: 22, fontWeight: FontWeight.w800),
+            ),
+            textTheme: GoogleFonts.nunitoTextTheme(ThemeData.light().textTheme),
           ),
           darkTheme: ThemeData(
             useMaterial3: true,
+            scaffoldBackgroundColor: const Color(0xFF0F172A),
             colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.blueAccent,
+              seedColor: const Color(0xFF818CF8),
+              primary: const Color(0xFF818CF8),
+              secondary: const Color(0xFF38BDF8),
               brightness: Brightness.dark,
+              surface: const Color(0xFF1E293B),
             ),
-            textTheme: GoogleFonts.cairoTextTheme(ThemeData.dark().textTheme),
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              centerTitle: true,
+              iconTheme: IconThemeData(color: Colors.white),
+              titleTextStyle: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800),
+            ),
+            textTheme: GoogleFonts.nunitoTextTheme(ThemeData.dark().textTheme),
           ),
           themeMode: userProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
           home: const MainNavigation(),

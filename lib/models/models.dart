@@ -8,6 +8,7 @@ class Word {
   final List<String> synonyms;
   final List<String> antonyms;
   final String ipa;
+  final String movieQuote; // Contextual movie quote bonus feature
   final String categoryId;
   final String subcategoryId;
   final String levelId;
@@ -20,6 +21,7 @@ class Word {
     required this.example,
     required this.emoji,
     this.ipa = '',
+    this.movieQuote = '',
     required this.synonyms,
     required this.antonyms,
     required this.categoryId,
@@ -36,6 +38,7 @@ class Word {
       example: json['example'],
       emoji: json['emoji'],
       ipa: json['ipa'] ?? '',
+      movieQuote: json['movieQuote'] ?? '',
       synonyms: List<String>.from(json['synonyms']),
       antonyms: List<String>.from(json['antonyms']),
       categoryId: json['categoryId'],
@@ -53,6 +56,7 @@ class Word {
       'example': example,
       'emoji': emoji,
       'ipa': ipa,
+      'movieQuote': movieQuote,
       'synonyms': synonyms,
       'antonyms': antonyms,
       'categoryId': categoryId,

@@ -99,7 +99,10 @@ class _WordScrambleGameState extends State<WordScrambleGame> {
 
   void _loadNewWord() {
     final random = Random();
-    currentWord = MockData.words[random.nextInt(MockData.words.length)];
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final allWords = [...MockData.words, ...userProvider.customWords];
+
+    currentWord = allWords[random.nextInt(allWords.length)];
     scrambledLetters = currentWord.word.toUpperCase().split('')..shuffle();
     userLetters = List.filled(currentWord.word.length, '');
   }
@@ -200,7 +203,10 @@ class _WordMatchGameState extends State<WordMatchGame> {
 
   void _initGame() {
     final random = Random();
-    gameWords = List.from(MockData.words)..shuffle(random);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final allWords = [...MockData.words, ...userProvider.customWords];
+
+    gameWords = List.from(allWords)..shuffle(random);
     gameWords = gameWords.take(5).toList();
 
     englishWords = gameWords.map((w) => w.word).toList()..shuffle(random);
@@ -327,12 +333,15 @@ class _TimeAttackGameState extends State<TimeAttackGame> {
 
   void _loadQuestion() {
     final random = Random();
-    _currentWord = MockData.words[random.nextInt(MockData.words.length)];
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final allWords = [...MockData.words, ...userProvider.customWords];
+
+    _currentWord = allWords[random.nextInt(allWords.length)];
 
     // Generate 3 wrong options + 1 correct option
     Set<String> optionsSet = {_currentWord.translation};
     while(optionsSet.length < 4) {
-       optionsSet.add(MockData.words[random.nextInt(MockData.words.length)].translation);
+       optionsSet.add(allWords[random.nextInt(allWords.length)].translation);
     }
     _options = optionsSet.toList()..shuffle();
   }

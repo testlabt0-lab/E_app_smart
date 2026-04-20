@@ -8,6 +8,7 @@ class UserProvider with ChangeNotifier {
   int _streak = 0;
   List<SavedItem> _savedItems = [];
   List<Word> _customWords = [];
+  List<String> _unlockedBadges = ['Newbie'];
   bool _isDarkMode = false;
   String _lastLoginDate = DateTime.now().toIso8601String().split('T')[0];
 
@@ -15,6 +16,7 @@ class UserProvider with ChangeNotifier {
   int get streak => _streak;
   List<SavedItem> get savedItems => _savedItems;
   List<Word> get customWords => _customWords;
+  List<String> get unlockedBadges => _unlockedBadges;
   bool get isDarkMode => _isDarkMode;
 
   UserProvider() {
@@ -33,6 +35,8 @@ class UserProvider with ChangeNotifier {
 
     final customWordsJson = prefs.getStringList('customWords') ?? [];
     _customWords = customWordsJson.map((e) => Word.fromJson(json.decode(e))).toList();
+
+    _unlockedBadges = prefs.getStringList('badges') ?? ['Newbie'];
 
     _checkStreak();
     notifyListeners();
@@ -65,9 +69,35 @@ class UserProvider with ChangeNotifier {
 
   void addXp(int amount) async {
     _xp += amount;
+    _checkBadges();
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     prefs.setInt('xp', _xp);
+  }
+
+  void _checkBadges() async {
+    bool newlyUnlocked = false;
+    if (_xp >= 100 && !_unlockedBadges.contains('Centurion')) {
+      _unlockedBadges.add('Centurion');
+      newlyUnlocked = true;
+    }
+    if (_xp >= 500 && !_unlockedBadges.contains('Speed Demon')) {
+      _unlockedBadges.add('Speed Demon');
+      newlyUnlocked = true;
+    }
+    if (_streak >= 7 && !_unlockedBadges.contains('7 Day Streak')) {
+      _unlockedBadges.add('7 Day Streak');
+      newlyUnlocked = true;
+    }
+    if (_savedItems.length >= 10 && !_unlockedBadges.contains('Bookworm')) {
+      _unlockedBadges.add('Bookworm');
+      newlyUnlocked = true;
+    }
+
+    if (newlyUnlocked) {
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setStringList('badges', _unlockedBadges);
+    }
   }
 
   void saveWord(String wordId) async {

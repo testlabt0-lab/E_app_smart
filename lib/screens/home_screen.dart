@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'dart:math';
 import '../data/mock_data.dart';
+import 'package:provider/provider.dart';
 import '../models/models.dart';
 import 'word_card_screen.dart';
+import '../widgets/glass_card.dart';
+import '../providers/user_provider.dart';
 
 import 'story_reading_screen.dart';
 import 'translator_screen.dart';
+import 'grammar_checker_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,6 +22,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<Word> _searchResults = [];
+  late Word _wordOfTheDay;
+
+  @override
+  void initState() {
+    super.initState();
+    // Select a random Word of the Day (in a real app, this would be daily seeded)
+    _wordOfTheDay = MockData.words[Random().nextInt(MockData.words.length)];
+  }
 
   void _performSearch(String query) {
     if (query.isEmpty) {
@@ -25,8 +38,12 @@ class _HomeScreenState extends State<HomeScreen> {
       });
       return;
     }
+
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final allWords = [...MockData.words, ...userProvider.customWords];
+
     setState(() {
-      _searchResults = MockData.words.where((word) {
+      _searchResults = allWords.where((word) {
         return word.word.toLowerCase().contains(query.toLowerCase()) ||
                word.translation.contains(query);
       }).toList();
@@ -35,10 +52,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Categories & Levels', style: TextStyle(fontWeight: FontWeight.bold)),
-        centerTitle: true,
+        title: const Text('EFA Pro'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60.0),
           child: Padding(
@@ -59,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       )
                     : null,
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceVariant,
+                fillColor: isDark ? Colors.white10 : Colors.white,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30.0),
                   borderSide: BorderSide.none,
@@ -71,151 +90,179 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: _searchResults.isNotEmpty
           ? _buildSearchResults()
-          : SingleChildScrollView(
+          : ListView(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Levels',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+        children: [
+          // Word of the Day - Glassmorphism Card
+          GlassCard(
+            color: theme.colorScheme.primary,
+            opacity: 0.15,
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => WordCardScreen(word: _wordOfTheDay))),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(_wordOfTheDay.emoji, style: const TextStyle(fontSize: 32)),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('🌟 Word of the Day', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.orange)),
+                      Text(_wordOfTheDay.word, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
+                      Text(_wordOfTheDay.translation, style: TextStyle(fontSize: 16, color: isDark ? Colors.grey[400] : Colors.grey[700])),
+                    ],
+                  ),
+                ),
+                Icon(Icons.arrow_forward_ios, color: theme.colorScheme.primary),
+              ],
             ),
-            const SizedBox(height: 10),
-            SizedBox(
-              height: 120,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: MockData.levels.length,
-                itemBuilder: (context, index) {
-                  final level = MockData.levels[index];
-                  final color = Color(int.parse(level.colorHex));
-                  return Card(
-                    color: color.withOpacity(0.2),
-                    margin: const EdgeInsets.only(right: 12),
-                    child: Container(
-                      width: 140,
-                      padding: const EdgeInsets.all(16),
+          ),
+
+          const SizedBox(height: 32),
+          const Text('Learning Path', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 16),
+
+          // Learning Path Timeline Map
+          ...List.generate(MockData.categories.length + 1, (index) {
+            if (index == MockData.categories.length) {
+              // Custom Words Path Node
+              return Container(
+                margin: const EdgeInsets.only(bottom: 24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        final customWords = Provider.of<UserProvider>(context, listen: false).customWords;
+                        if (customWords.isNotEmpty) {
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryWordsScreen(
+                            category: Category(id: 'custom', name: 'كلماتي', icon: '📝'),
+                            isCustomWords: true,
+                          )));
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No custom words added yet. Add some in Profile!')));
+                        }
+                      },
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(level.id, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color)),
+                          Container(
+                            width: 80, height: 80,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: theme.colorScheme.primary.withOpacity(0.15),
+                              border: Border.all(color: theme.colorScheme.primary, width: 4),
+                              boxShadow: [
+                                BoxShadow(color: theme.colorScheme.primary.withOpacity(0.3), blurRadius: 15, spreadRadius: 2)
+                              ]
+                            ),
+                            child: const Center(child: Text('📝', style: TextStyle(fontSize: 36))),
+                          ),
                           const SizedBox(height: 8),
-                          Text(level.name, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12)),
+                          const Text('My Words', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                         ],
                       ),
                     ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 12),
-            Card(
-              color: Colors.purple.shade100,
-              child: ListTile(
-                leading: const Icon(Icons.translate, color: Colors.purple, size: 32),
-                title: const Text('Smart Translator', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                subtitle: const Text('Translate text instantly (EN/AR)'),
-                trailing: const Icon(Icons.arrow_forward_ios),
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const TranslatorScreen()));
-                },
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Categories',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.2,
-              ),
-              itemCount: MockData.categories.length,
-              itemBuilder: (context, index) {
-                final category = MockData.categories[index];
-                return InkWell(
-                  onTap: () {
-                    if (category.subcategories.isNotEmpty) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SubcategoryScreen(category: category),
-                        ),
-                      );
-                    } else {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CategoryWordsScreen(category: category),
-                        ),
-                      );
-                    }
-                  },
-                  child: Card(
-                    elevation: 2,
+                  ],
+                ),
+              );
+            }
+            final category = MockData.categories[index];
+            bool isLeft = index % 2 == 0;
+            return Container(
+              margin: const EdgeInsets.only(bottom: 24),
+              child: Row(
+                mainAxisAlignment: isLeft ? MainAxisAlignment.start : MainAxisAlignment.end,
+                children: [
+                  if (!isLeft) const Spacer(),
+                  GestureDetector(
+                    onTap: () {
+                      if (category.subcategories.isNotEmpty) {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => SubcategoryScreen(category: category)));
+                      } else {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryWordsScreen(category: category)));
+                      }
+                    },
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(category.icon, style: const TextStyle(fontSize: 40)),
-                        const SizedBox(height: 12),
-                        Text(category.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                        Container(
+                          width: 80, height: 80,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: theme.colorScheme.secondary.withOpacity(0.15),
+                            border: Border.all(color: theme.colorScheme.secondary, width: 4),
+                            boxShadow: [
+                              BoxShadow(color: theme.colorScheme.secondary.withOpacity(0.3), blurRadius: 15, spreadRadius: 2)
+                            ]
+                          ),
+                          child: Center(child: Text(category.icon, style: const TextStyle(fontSize: 36))),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(category.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       ],
                     ),
                   ),
-                );
-              },
-            ),
-            const SizedBox(height: 24),
-            Card(
-              color: Colors.blue.shade100,
-              child: ListTile(
-                leading: const Icon(Icons.chat, color: Colors.blue, size: 32),
-                title: const Text('Quick Phrases', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                subtitle: const Text('Learn common sentences quickly'),
-                trailing: const Icon(Icons.arrow_forward_ios),
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const PhrasesScreen()));
-                },
+                  if (isLeft) const Spacer(),
+                ],
               ),
+            );
+          }),
+
+          const SizedBox(height: 32),
+          const Text('Quick Tools', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 16),
+
+          // Modern Action Cards
+          _buildToolCard(context, 'Grammar Checker', 'Check your syntax instantly', Icons.spellcheck, Colors.teal, () {
+             Navigator.push(context, MaterialPageRoute(builder: (_) => const GrammarCheckerScreen()));
+          }),
+          const SizedBox(height: 12),
+          _buildToolCard(context, 'Smart Translator', 'Translate EN/AR offline', Icons.translate, Colors.purple, () {
+             Navigator.push(context, MaterialPageRoute(builder: (_) => const TranslatorScreen()));
+          }),
+          const SizedBox(height: 12),
+          _buildToolCard(context, 'Quick Phrases', 'Learn common sentences', Icons.chat_bubble_outline, Colors.blue, () {
+             Navigator.push(context, MaterialPageRoute(builder: (_) => const PhrasesScreen()));
+          }),
+          const SizedBox(height: 12),
+          _buildToolCard(context, 'Interactive Stories', 'Read and translate on tap', Icons.menu_book, Colors.orange, () {
+             // Mock opening the first story for quick access
+             Navigator.push(context, MaterialPageRoute(builder: (_) => StoryReadingScreen(story: MockData.stories[0])));
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToolCard(BuildContext context, String title, String sub, IconData icon, Color color, VoidCallback onTap) {
+    return GlassCard(
+      opacity: 0.1,
+      color: color,
+      onTap: onTap,
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(color: color.withOpacity(0.2), borderRadius: BorderRadius.circular(16)),
+            child: Icon(icon, color: color, size: 28),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                Text(sub, style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color)),
+              ],
             ),
-            const SizedBox(height: 24),
-            const Text(
-              'Interactive Stories',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: MockData.stories.length,
-              itemBuilder: (context, index) {
-                final story = MockData.stories[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: ListTile(
-                    leading: const Icon(Icons.menu_book, color: Colors.blue),
-                    title: Text(story.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StoryReadingScreen(story: story),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
+          ),
+          const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+        ],
       ),
     );
   }
@@ -263,10 +310,9 @@ class SubcategoryScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           final sub = category.subcategories[index];
           return Card(
-            child: ListTile(
-              leading: Text(sub.icon, style: const TextStyle(fontSize: 24)),
-              title: Text(sub.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            child: GlassCard(
+              opacity: 0.1,
+              color: Theme.of(context).colorScheme.primary,
               onTap: () {
                 Navigator.push(
                   context,
@@ -275,6 +321,14 @@ class SubcategoryScreen extends StatelessWidget {
                   ),
                 );
               },
+              child: Row(
+                children: [
+                  Text(sub.icon, style: const TextStyle(fontSize: 32)),
+                  const SizedBox(width: 16),
+                  Expanded(child: Text(sub.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18))),
+                  const Icon(Icons.arrow_forward_ios, size: 16),
+                ],
+              ),
             ),
           );
         },
@@ -286,18 +340,24 @@ class SubcategoryScreen extends StatelessWidget {
 class CategoryWordsScreen extends StatelessWidget {
   final Category category;
   final Subcategory? subcategory;
+  final bool isCustomWords;
 
-  const CategoryWordsScreen({super.key, required this.category, this.subcategory});
+  const CategoryWordsScreen({super.key, required this.category, this.subcategory, this.isCustomWords = false});
 
   @override
   Widget build(BuildContext context) {
-    final words = MockData.words.where((w) {
-      bool matchCat = w.categoryId == category.id;
-      if (subcategory != null) {
-        return matchCat && w.subcategoryId == subcategory!.id;
-      }
-      return matchCat;
-    }).toList();
+    List<Word> words = [];
+    if (isCustomWords) {
+      words = Provider.of<UserProvider>(context).customWords;
+    } else {
+      words = MockData.words.where((w) {
+        bool matchCat = w.categoryId == category.id;
+        if (subcategory != null) {
+          return matchCat && w.subcategoryId == subcategory!.id;
+        }
+        return matchCat;
+      }).toList();
+    }
 
     String title = subcategory != null ? '${subcategory!.icon} ${subcategory!.name}' : '${category.icon} ${category.name}';
 

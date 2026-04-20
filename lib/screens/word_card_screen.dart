@@ -183,6 +183,30 @@ class _WordCardScreenState extends State<WordCardScreen> {
             const Text('Example:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             Text('"${widget.word.example}"', style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic)),
 
+            if (widget.word.movieQuote.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              GlassCard(
+                color: Colors.amber,
+                opacity: 0.1,
+                child: Row(
+                  children: [
+                    const Icon(Icons.movie_creation, color: Colors.amber, size: 32),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Movie Context', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.amber)),
+                          const SizedBox(height: 4),
+                          Text(widget.word.movieQuote, style: const TextStyle(fontSize: 15, fontStyle: FontStyle.italic)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
             const SizedBox(height: 20),
             TextButton.icon(
               onPressed: () {

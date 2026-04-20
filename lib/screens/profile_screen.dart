@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'dart:io';
 import '../providers/user_provider.dart';
 import '../models/models.dart';
@@ -129,18 +130,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 _buildStatCard(context, 'Total XP', '${userProvider.xp}', Icons.star, Colors.amber),
                 _buildStatCard(context, 'Day Streak', '${userProvider.streak}', Icons.local_fire_department, Colors.orange),
-                _buildStatCard(context, 'Saved Words', '${userProvider.savedItems.length}', Icons.bookmark, Colors.blue),
+                _buildStatCard(context, 'Custom Words', '${userProvider.customWords.length}', Icons.edit_note, Colors.purple),
               ],
             ),
 
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildStatCard(context, 'Total XP', '${userProvider.xp}', Icons.star, Colors.amber),
-                _buildStatCard(context, 'Day Streak', '${userProvider.streak}', Icons.local_fire_department, Colors.orange),
-                _buildStatCard(context, 'Custom Words', '${userProvider.customWords.length}', Icons.edit_note, Colors.purple),
-              ],
+            const SizedBox(height: 32),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Achievements & Badges', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 120,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: userProvider.unlockedBadges.length,
+                itemBuilder: (context, index) {
+                  final badge = userProvider.unlockedBadges[index];
+                  IconData iconData = Icons.star;
+                  Color color = Colors.amber;
+
+                  if (badge == 'Centurion') { iconData = Icons.military_tech; color = Colors.orange; }
+                  else if (badge == 'Speed Demon') { iconData = Icons.bolt; color = Colors.red; }
+                  else if (badge == '7 Day Streak') { iconData = Icons.local_fire_department; color = Colors.deepOrange; }
+                  else if (badge == 'Bookworm') { iconData = Icons.menu_book; color = Colors.blue; }
+
+                  return Container(
+                    width: 100,
+                    margin: const EdgeInsets.only(right: 16),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: color.withOpacity(0.5)),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(iconData, size: 40, color: color),
+                        const SizedBox(height: 8),
+                        Text(badge, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
 
             const SizedBox(height: 16),
@@ -288,8 +321,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _exportData(UserProvider userProvider) async {
     try {
-      final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/my_dictionary.csv');
+      final directory = await getTemporaryDirectory();
+      final filePath = '${directory.path}/my_dictionary.csv';
+      final file = File(filePath);
 
       String csvContent = 'Word,Translation,Example\n';
       for (var w in userProvider.customWords) {
@@ -297,8 +331,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
 
       await file.writeAsString(csvContent);
-      if(mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Exported to ${file.path}')));
+
+      final result = await Share.shareXFiles([XFile(filePath)], text: 'My EFA Pro Custom Dictionary');
+
+      if(mounted && result.status == ShareResultStatus.success) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Dictionary exported successfully!')));
       }
     } catch (e) {
       if(mounted) {
