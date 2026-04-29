@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:flutter_tts/flutter_tts.dart';
 
 class AiProScreen extends StatelessWidget {
   const AiProScreen({super.key});
@@ -111,7 +115,11 @@ class AiChatScreen extends StatefulWidget {
 class _AiChatScreenState extends State<AiChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  late stt.SpeechToText _speech;
+  final FlutterTts _tts = FlutterTts();
+
   String _apiKey = '';
+  bool _isListening = false;
 
   final List<Map<String, String>> _messages = [
     {"role": "ai", "text": "Hello! I am your AI language partner. Let's practice! Imagine we are at a restaurant and I am the waiter. What would you like to order?"}
@@ -120,7 +128,14 @@ class _AiChatScreenState extends State<AiChatScreen> {
   @override
   void initState() {
     super.initState();
+    _speech = stt.SpeechToText();
+    _initTts();
     _loadApiKey();
+  }
+
+  void _initTts() async {
+    await _tts.setLanguage("en-US");
+    await _tts.setSpeechRate(0.5);
   }
 
   Future<void> _loadApiKey() async {
@@ -132,28 +147,91 @@ class _AiChatScreenState extends State<AiChatScreen> {
     }
   }
 
-  void _sendMessage() {
-    if (_controller.text.isEmpty) return;
-
-    setState(() {
-      _messages.add({"role": "user", "text": _controller.text});
-    });
-
-    final userText = _controller.text;
-    _controller.clear();
-
-    // Mocking an AI Response because real API requires a valid key
-    Future.delayed(const Duration(seconds: 1), () {
-      if(mounted) {
-        setState(() {
-          if (_apiKey.isEmpty) {
-             _messages.add({"role": "ai", "text": "[API KEY REQUIRED] I received: '$userText'. Please save your Gemini/OpenAI API key securely in Settings to enable real responses!"});
-          } else {
-             _messages.add({"role": "ai", "text": "That sounds delicious! Would you like anything to drink with that? (Simulated response using secure key: ${_apiKey.substring(0, min(5, _apiKey.length))}...)"});
-          }
+  void _listenVoice() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize();
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(onResult: (val) {
+          setState(() {
+            _controller.text = val.recognizedWords;
+          });
         });
       }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+      if (_controller.text.isNotEmpty) _sendMessage();
+    }
+  }
+
+  Future<void> _sendMessage() async {
+    if (_controller.text.isEmpty) return;
+
+    final userText = _controller.text;
+    setState(() {
+      _messages.add({"role": "user", "text": userText});
     });
+
+    _controller.clear();
+
+    if (_apiKey.isEmpty) {
+      if (mounted) {
+        setState(() {
+          _messages.add({"role": "ai", "text": "[API KEY REQUIRED] Please save your Gemini API key securely in Settings to enable real responses!"});
+        });
+      }
+      return;
+    }
+
+    try {
+      final url = Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$_apiKey');
+
+      // Build conversation history for Gemini format
+      List<Map<String, dynamic>> contents = [];
+      for (var msg in _messages) {
+        contents.add({
+          "role": msg["role"] == "ai" ? "model" : "user",
+          "parts": [{"text": msg["text"]}]
+        });
+      }
+
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({"contents": contents}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final replyText = data['candidates'][0]['content']['parts'][0]['text'].toString();
+
+        if (mounted) {
+          setState(() {
+            _messages.add({"role": "ai", "text": replyText});
+          });
+          _tts.speak(replyText);
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _messages.add({"role": "ai", "text": "Error communicating with AI. Please check your API key."});
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _messages.add({"role": "ai", "text": "Network error. Please check your connection."});
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _tts.stop();
+    super.dispose();
   }
 
   @override
@@ -205,6 +283,15 @@ class _AiChatScreenState extends State<AiChatScreen> {
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(24)),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                     ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onLongPress: _listenVoice,
+                  onLongPressUp: _listenVoice, // stops listening and sends
+                  child: CircleAvatar(
+                    backgroundColor: _isListening ? Colors.red : Colors.green,
+                    child: const Icon(Icons.mic, color: Colors.white),
                   ),
                 ),
                 const SizedBox(width: 8),

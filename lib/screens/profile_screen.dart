@@ -8,6 +8,8 @@ import 'dart:io';
 import '../providers/user_provider.dart';
 import '../models/models.dart';
 import 'settings_screen.dart';
+import 'auth_screen.dart';
+import 'global_leaderboard_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -283,9 +285,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
 
             const SizedBox(height: 32),
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text('Leaderboard', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Leaderboard', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                TextButton.icon(
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GlobalLeaderboardScreen())),
+                  icon: const Icon(Icons.public, size: 16),
+                  label: const Text('Global'),
+                )
+              ],
             ),
             const SizedBox(height: 10),
             _buildLeaderboardItem(1, 'Ahmed', 1250, false),
@@ -293,7 +302,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildLeaderboardItem(3, 'You', userProvider.xp, true),
             _buildLeaderboardItem(4, 'Omar', 420, false),
 
-            const SizedBox(height: 40),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => AuthScreen(
+                  onLoginSuccess: () {
+                     Navigator.pop(context);
+                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Logged in and Synced!')));
+                  },
+                )));
+              },
+              icon: const Icon(Icons.cloud_sync),
+              label: const Text('Cloud Sync / Login'),
+              style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50), backgroundColor: Colors.blue.shade100),
+            ),
+            const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: () => _showAddCustomWordDialog(context, userProvider),
               icon: const Icon(Icons.add),

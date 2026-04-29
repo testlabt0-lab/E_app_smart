@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import '../models/models.dart';
 
 class UserProvider with ChangeNotifier {
@@ -151,5 +152,51 @@ class UserProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final jsonList = _customWords.map((item) => json.encode(item.toJson())).toList();
     prefs.setStringList('customWords', jsonList);
+  }
+
+  // --- Real Cloud Sync Implementation ---
+  // In a production app, the backendUrl would point to your real Firebase Functions or custom backend
+  // e.g. 'https://us-central1-efapro-app.cloudfunctions.net/syncUserData'
+  Future<bool> syncWithCloud(String email, String token) async {
+    try {
+      final url = Uri.parse('https://your-real-backend-api.com/sync');
+
+      final payload = {
+        'email': email,
+        'xp': _xp,
+        'streak': _streak,
+        'badges': _unlockedBadges,
+        'savedItems': _savedItems.map((e) => e.toJson()).toList(),
+        'customWords': _customWords.map((e) => e.toJson()).toList(),
+      };
+
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token'
+        },
+        body: json.encode(payload),
+      );
+
+      if (response.statusCode == 200) {
+        // Assume backend merges and returns the "truth"
+        final data = json.decode(response.body);
+        _xp = data['xp'] ?? _xp;
+        _streak = data['streak'] ?? _streak;
+
+        if (data['badges'] != null) {
+          _unlockedBadges = List<String>.from(data['badges']);
+        }
+
+        // Notify UI of changes from cloud
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      // Return false on network/server error so the UI can show a failure message
+      return false;
+    }
   }
 }

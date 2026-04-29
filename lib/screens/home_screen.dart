@@ -11,6 +11,7 @@ import '../providers/user_provider.dart';
 import 'story_reading_screen.dart';
 import 'translator_screen.dart';
 import 'grammar_checker_screen.dart';
+import 'ar_translator_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -233,6 +234,10 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildToolCard(context, 'Interactive Stories', 'Read and translate on tap', Icons.menu_book, Colors.orange, () {
              // Mock opening the first story for quick access
              Navigator.push(context, MaterialPageRoute(builder: (_) => StoryReadingScreen(story: MockData.stories[0])));
+          }),
+          const SizedBox(height: 12),
+          _buildToolCard(context, 'AR Camera Lens', 'Point at objects to learn', Icons.camera_alt, Colors.redAccent, () {
+             Navigator.push(context, MaterialPageRoute(builder: (_) => const ArTranslatorScreen()));
           }),
         ],
       ),
