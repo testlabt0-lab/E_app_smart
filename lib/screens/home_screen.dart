@@ -16,6 +16,8 @@ import 'two_minute_rush_screen.dart';
 import 'shadowing_screen.dart';
 import 'adaptive_stories_screen.dart';
 import 'placement_test_screen.dart';
+import 'tongue_twister_screen.dart';
+import 'minimal_pairs_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -259,6 +261,14 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 12),
           _buildToolCard(context, 'Shadowing Studio', 'Repeat and perfect your accent', Icons.mic_external_on, Colors.indigoAccent, () {
              Navigator.push(context, MaterialPageRoute(builder: (_) => const ShadowingScreen()));
+          }),
+          const SizedBox(height: 12),
+          _buildToolCard(context, 'Tongue Twisters', 'Speed and fluency gym', Icons.speed, Colors.deepPurple, () {
+             Navigator.push(context, MaterialPageRoute(builder: (_) => const TongueTwisterScreen()));
+          }),
+          const SizedBox(height: 12),
+          _buildToolCard(context, 'Minimal Pairs', 'Train your ears on subtle sounds', Icons.hearing, Colors.cyan, () {
+             Navigator.push(context, MaterialPageRoute(builder: (_) => const MinimalPairsScreen()));
           }),
           const SizedBox(height: 12),
           _buildToolCard(context, 'Smart Translator', 'Translate EN/AR offline', Icons.translate, Colors.purple, () {

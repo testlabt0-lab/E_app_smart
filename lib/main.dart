@@ -17,9 +17,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Notification Service and schedule daily reminders
-  final notificationService = NotificationService();
-  await notificationService.init();
-  await notificationService.scheduleDailyReminder();
+  try {
+    final notificationService = NotificationService();
+    await notificationService.init();
+    await notificationService.scheduleDailyReminder();
+  } catch (e) {
+    debugPrint('Failed to initialize notifications: $e');
+  }
 
   runApp(
     MultiProvider(

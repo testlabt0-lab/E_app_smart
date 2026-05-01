@@ -64,7 +64,7 @@ class NotificationService {
       'Don\'t break your streak! Jump in to review your flashcards and play a quick game.',
       scheduledDate,
       platformChannelSpecifics,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );

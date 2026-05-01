@@ -108,6 +108,34 @@ class Phrase {
   });
 }
 
+class TongueTwister {
+  final String id;
+  final String english;
+  final String arabic;
+
+  TongueTwister({
+    required this.id,
+    required this.english,
+    required this.arabic,
+  });
+}
+
+class MinimalPair {
+  final String id;
+  final String word1;
+  final String word2;
+  final String arabic1;
+  final String arabic2;
+
+  MinimalPair({
+    required this.id,
+    required this.word1,
+    required this.word2,
+    required this.arabic1,
+    required this.arabic2,
+  });
+}
+
 class Level {
   final String id;
   final String name;

@@ -73,6 +73,20 @@ class MockData {
     Phrase(id: 's5', english: 'Spill the beans', arabic: 'أفشِ السر', context: 'Idiom: To reveal secret information unintentionally or indiscreetly.'),
   ];
 
+  static List<TongueTwister> tongueTwisters = [
+    TongueTwister(id: 't1', english: 'Peter Piper picked a peck of pickled peppers.', arabic: 'بيتر بايبر التقط كمية من الفلفل المخلل.'),
+    TongueTwister(id: 't2', english: 'She sells seashells by the seashore.', arabic: 'تبيع صدف البحر بجوار شاطئ البحر.'),
+    TongueTwister(id: 't3', english: 'I saw a kitten eating chicken in the kitchen.', arabic: 'رأيت قطة تأكل الدجاج في المطبخ.'),
+    TongueTwister(id: 't4', english: 'How can a clam cram in a clean cream can?', arabic: 'كيف يمكن لمحار أن يحشر نفسه في علبة كريمة نظيفة؟'),
+  ];
+
+  static List<MinimalPair> minimalPairs = [
+    MinimalPair(id: 'm1', word1: 'Park', word2: 'Bark', arabic1: 'حديقة', arabic2: 'ينبح'),
+    MinimalPair(id: 'm2', word1: 'Ship', word2: 'Sheep', arabic1: 'سفينة', arabic2: 'خروف'),
+    MinimalPair(id: 'm3', word1: 'Think', word2: 'Sink', arabic1: 'يفكر', arabic2: 'يغوص / حوض'),
+    MinimalPair(id: 'm4', word1: 'Fan', word2: 'Van', arabic1: 'مروحة', arabic2: 'شاحنة مغلقة'),
+  ];
+
   static List<Story> stories = [
     Story(
       id: 's1',

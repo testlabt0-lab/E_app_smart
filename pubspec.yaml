@@ -55,6 +55,7 @@ dependencies:
   flutter_heatmap_calendar: ^1.0.5
   flutter_local_notifications: ^21.0.0
   timezone: ^0.11.0
+  cloud_firestore: ^6.3.0
 
 dev_dependencies:
   flutter_test:

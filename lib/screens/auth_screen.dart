@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+// import 'package:firebase_auth/firebase_auth.dart'; // Commented out to prevent crash
 import '../widgets/glass_card.dart';
 import '../providers/user_provider.dart';
 
@@ -26,24 +27,29 @@ class _AuthScreenState extends State<AuthScreen> {
 
     setState(() => _isLoading = true);
 
-    // In a real Firebase app, this would be:
-    // UserCredential cred = await FirebaseAuth.instance.signInWithEmailAndPassword(...)
-    // String token = await cred.user!.getIdToken();
-
-    // We execute the real sync logic structure using the Provider
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
-    // Attempt real cloud sync (will fail since URL is dummy, but tests real logic path)
-    bool success = await userProvider.syncWithCloud(_emailController.text, 'mock_firebase_token');
+    try {
+      // Mock Auth Logic to prevent crash without Firebase initialization
+      await Future.delayed(const Duration(seconds: 1));
 
-    if (mounted) {
-      setState(() => _isLoading = false);
-      if (!success) {
-         // Show error if backend is unreachable, but fallback to success for UX flow demonstration
-         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Network error connecting to cloud server, using local offline profile.')));
-         widget.onLoginSuccess();
-      } else {
-         widget.onLoginSuccess();
+      // Sync local XP/Streaks with Mock Cloud
+      bool success = await userProvider.syncWithCloud(_emailController.text.trim(), 'mock_uid_123');
+
+      if (mounted) {
+        setState(() => _isLoading = false);
+        if (success) {
+           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Logged in and Synced via Mock Backend!'), backgroundColor: Colors.green));
+           widget.onLoginSuccess();
+        } else {
+           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Login OK, but sync failed.'), backgroundColor: Colors.orange));
+           widget.onLoginSuccess();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red));
       }
     }
   }
