@@ -13,6 +13,8 @@ import 'translator_screen.dart';
 import 'grammar_checker_screen.dart';
 import 'ar_translator_screen.dart';
 import 'two_minute_rush_screen.dart';
+import 'shadowing_screen.dart';
+import 'adaptive_stories_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -254,6 +256,10 @@ class _HomeScreenState extends State<HomeScreen> {
              Navigator.push(context, MaterialPageRoute(builder: (_) => const GrammarCheckerScreen()));
           }),
           const SizedBox(height: 12),
+          _buildToolCard(context, 'Shadowing Studio', 'Repeat and perfect your accent', Icons.mic_external_on, Colors.indigoAccent, () {
+             Navigator.push(context, MaterialPageRoute(builder: (_) => const ShadowingScreen()));
+          }),
+          const SizedBox(height: 12),
           _buildToolCard(context, 'Smart Translator', 'Translate EN/AR offline', Icons.translate, Colors.purple, () {
              Navigator.push(context, MaterialPageRoute(builder: (_) => const TranslatorScreen()));
           }),
@@ -263,8 +269,7 @@ class _HomeScreenState extends State<HomeScreen> {
           }),
           const SizedBox(height: 12),
           _buildToolCard(context, 'Interactive Stories', 'Read and translate on tap', Icons.menu_book, Colors.orange, () {
-             // Mock opening the first story for quick access
-             Navigator.push(context, MaterialPageRoute(builder: (_) => StoryReadingScreen(story: MockData.stories[0])));
+             Navigator.push(context, MaterialPageRoute(builder: (_) => const AdaptiveStoriesScreen()));
           }),
           const SizedBox(height: 12),
           _buildToolCard(context, 'AR Camera Lens', 'Point at objects to learn', Icons.camera_alt, Colors.redAccent, () {

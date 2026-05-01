@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
 import 'dart:io';
 import '../providers/user_provider.dart';
 import '../models/models.dart';
@@ -200,10 +201,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 32),
             const Align(
               alignment: Alignment.centerLeft,
-              child: Text('Study Heatmap (Mock)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              child: Text('Study Heatmap', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ),
             const SizedBox(height: 8),
-            _buildMockHeatmap(),
+            Card(
+              color: Colors.white.withOpacity(0.05),
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.withOpacity(0.2))),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: HeatMap(
+                  datasets: userProvider.activityHeatmap,
+                  colorMode: ColorMode.opacity,
+                  showText: false,
+                  scrollable: true,
+                  colorsets: const {
+                    1: Colors.green,
+                  },
+                  onClick: (value) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Activities on $value: ${userProvider.activityHeatmap[value] ?? 0}')));
+                  },
+                ),
+              ),
+            ),
 
             const SizedBox(height: 32),
             if (userProvider.savedItems.isNotEmpty) ...[
@@ -377,28 +397,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to export data')));
       }
     }
-  }
-
-  Widget _buildMockHeatmap() {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 14,
-        crossAxisSpacing: 4,
-        mainAxisSpacing: 4,
-      ),
-      itemCount: 42, // Last 6 weeks mock
-      itemBuilder: (context, index) {
-        int intensity = (index % 5) * 50; // Mock intensity
-        return Container(
-          decoration: BoxDecoration(
-            color: intensity == 0 ? Colors.grey.shade300 : Colors.green.shade500.withOpacity(intensity / 200),
-            borderRadius: BorderRadius.circular(4),
-          ),
-        );
-      },
-    );
   }
 
   Widget _buildStatCard(BuildContext context, String title, String value, IconData icon, Color color) {

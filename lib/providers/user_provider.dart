@@ -11,6 +11,7 @@ class UserProvider with ChangeNotifier {
   List<Word> _customWords = [];
   List<String> _unlockedBadges = ['Newbie'];
   List<String> _mistakeWordIds = []; // The Mistake Clinic tracking
+  Map<DateTime, int> _activityHeatmap = {}; // Real Activity Heatmap tracking
   bool _isDarkMode = false;
   String _lastLoginDate = DateTime.now().toIso8601String().split('T')[0];
 
@@ -20,6 +21,7 @@ class UserProvider with ChangeNotifier {
   List<Word> get customWords => _customWords;
   List<String> get unlockedBadges => _unlockedBadges;
   List<String> get mistakeWordIds => _mistakeWordIds;
+  Map<DateTime, int> get activityHeatmap => _activityHeatmap;
   bool get isDarkMode => _isDarkMode;
 
   UserProvider() {
@@ -41,6 +43,12 @@ class UserProvider with ChangeNotifier {
 
     _unlockedBadges = prefs.getStringList('badges') ?? ['Newbie'];
     _mistakeWordIds = prefs.getStringList('mistakes') ?? [];
+
+    final heatmapJson = prefs.getString('heatmap');
+    if (heatmapJson != null) {
+      final decodedMap = json.decode(heatmapJson) as Map<String, dynamic>;
+      _activityHeatmap = decodedMap.map((key, value) => MapEntry(DateTime.parse(key), value as int));
+    }
 
     _checkStreak();
     notifyListeners();
@@ -74,9 +82,22 @@ class UserProvider with ChangeNotifier {
   void addXp(int amount) async {
     _xp += amount;
     _checkBadges();
+    _logActivity();
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     prefs.setInt('xp', _xp);
+  }
+
+  void _logActivity() async {
+    final today = DateTime.now();
+    // Normalize to midnight
+    final dateKey = DateTime(today.year, today.month, today.day);
+    _activityHeatmap[dateKey] = (_activityHeatmap[dateKey] ?? 0) + 1;
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    final stringMap = _activityHeatmap.map((key, value) => MapEntry(key.toIso8601String(), value));
+    prefs.setString('heatmap', json.encode(stringMap));
   }
 
   void _checkBadges() async {

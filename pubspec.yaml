@@ -52,6 +52,7 @@ dependencies:
   google_mlkit_image_labeling: ^0.14.2
   firebase_core: ^4.7.0
   firebase_auth: ^6.4.0
+  flutter_heatmap_calendar: ^1.0.5
 
 dev_dependencies:
   flutter_test:
