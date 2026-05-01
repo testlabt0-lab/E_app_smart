@@ -7,13 +7,20 @@ import 'screens/home_screen.dart';
 import 'screens/practice_screen.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'services/notification_service.dart';
 
 import 'screens/games_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/ai_pro_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Notification Service and schedule daily reminders
+  final notificationService = NotificationService();
+  await notificationService.init();
+  await notificationService.scheduleDailyReminder();
+
   runApp(
     MultiProvider(
       providers: [

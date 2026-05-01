@@ -15,6 +15,7 @@ import 'ar_translator_screen.dart';
 import 'two_minute_rush_screen.dart';
 import 'shadowing_screen.dart';
 import 'adaptive_stories_screen.dart';
+import 'placement_test_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -274,6 +275,10 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 12),
           _buildToolCard(context, 'AR Camera Lens', 'Point at objects to learn', Icons.camera_alt, Colors.redAccent, () {
              Navigator.push(context, MaterialPageRoute(builder: (_) => const ArTranslatorScreen()));
+          }),
+          const SizedBox(height: 12),
+          _buildToolCard(context, 'Placement Test', 'Find your exact level', Icons.school, Colors.green, () {
+             Navigator.push(context, MaterialPageRoute(builder: (_) => const PlacementTestScreen()));
           }),
           const SizedBox(height: 12),
           _buildToolCard(context, 'Slangs & Idioms', 'Cultural immersion phrases', Icons.groups, Colors.pink, () {
