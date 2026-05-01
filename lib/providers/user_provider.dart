@@ -10,6 +10,7 @@ class UserProvider with ChangeNotifier {
   List<SavedItem> _savedItems = [];
   List<Word> _customWords = [];
   List<String> _unlockedBadges = ['Newbie'];
+  List<String> _mistakeWordIds = []; // The Mistake Clinic tracking
   bool _isDarkMode = false;
   String _lastLoginDate = DateTime.now().toIso8601String().split('T')[0];
 
@@ -18,6 +19,7 @@ class UserProvider with ChangeNotifier {
   List<SavedItem> get savedItems => _savedItems;
   List<Word> get customWords => _customWords;
   List<String> get unlockedBadges => _unlockedBadges;
+  List<String> get mistakeWordIds => _mistakeWordIds;
   bool get isDarkMode => _isDarkMode;
 
   UserProvider() {
@@ -38,6 +40,7 @@ class UserProvider with ChangeNotifier {
     _customWords = customWordsJson.map((e) => Word.fromJson(json.decode(e))).toList();
 
     _unlockedBadges = prefs.getStringList('badges') ?? ['Newbie'];
+    _mistakeWordIds = prefs.getStringList('mistakes') ?? [];
 
     _checkStreak();
     notifyListeners();
@@ -121,12 +124,32 @@ class UserProvider with ChangeNotifier {
       final item = _savedItems[index];
       if (isCorrect) {
         item.interval *= 2;
+        removeMistake(wordId); // Remove from clinic if they got it right
       } else {
         item.interval = 1;
+        logMistake(wordId); // Add to clinic if they got it wrong
       }
       item.nextReviewDate = DateTime.now().add(Duration(days: item.interval));
       notifyListeners();
       _saveItemsToPrefs();
+    }
+  }
+
+  void logMistake(String wordId) async {
+    if (!_mistakeWordIds.contains(wordId)) {
+      _mistakeWordIds.add(wordId);
+      notifyListeners();
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setStringList('mistakes', _mistakeWordIds);
+    }
+  }
+
+  void removeMistake(String wordId) async {
+    if (_mistakeWordIds.contains(wordId)) {
+      _mistakeWordIds.remove(wordId);
+      notifyListeners();
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setStringList('mistakes', _mistakeWordIds);
     }
   }
 

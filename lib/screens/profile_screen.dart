@@ -10,6 +10,7 @@ import '../models/models.dart';
 import 'settings_screen.dart';
 import 'auth_screen.dart';
 import 'global_leaderboard_screen.dart';
+import 'mistake_clinic_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -183,6 +184,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onPressed: () => _exportData(userProvider),
               icon: const Icon(Icons.download),
               label: const Text('Export Dictionary (CSV)'),
+            ),
+
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MistakeClinicScreen())),
+              icon: const Icon(Icons.local_hospital),
+              label: const Text('The Mistake Clinic'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red.shade100,
+                foregroundColor: Colors.red.shade900,
+              ),
             ),
 
             const SizedBox(height: 32),

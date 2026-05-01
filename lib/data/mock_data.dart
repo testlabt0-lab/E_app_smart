@@ -64,6 +64,13 @@ class MockData {
     Phrase(id: 'p3', english: 'How much does this cost?', arabic: 'كم سعر هذا؟', context: 'أثناء التسوق.'),
     Phrase(id: 'p4', english: 'Can you help me find the nearest hospital?', arabic: 'هل يمكنك مساعدتي في العثور على أقرب مستشفى؟', context: 'في حالات الطوارئ أثناء السفر.'),
     Phrase(id: 'p5', english: 'I appreciate your help.', arabic: 'أقدر مساعدتك.', context: 'لشكر شخص ما بلباقة.'),
+
+    // Slangs and Idioms for Cultural Immersion
+    Phrase(id: 's1', english: 'Piece of cake', arabic: 'سهل جداً (قطعة كيك)', context: 'Idiom: When something is very easy to do.'),
+    Phrase(id: 's2', english: 'Break a leg', arabic: 'حظاً موفقاً', context: 'Idiom: Used to wish someone good luck, especially before a performance.'),
+    Phrase(id: 's3', english: 'Bite the bullet', arabic: 'تجرع السم / واجه الصعوبة', context: 'Idiom: To endure a painful or otherwise unpleasant situation that is seen as unavoidable.'),
+    Phrase(id: 's4', english: 'Hang out', arabic: 'يقضي وقتاً / يتسكع', context: 'Slang: To spend time relaxing or socializing informally.'),
+    Phrase(id: 's5', english: 'Spill the beans', arabic: 'أفشِ السر', context: 'Idiom: To reveal secret information unintentionally or indiscreetly.'),
   ];
 
   static List<Story> stories = [

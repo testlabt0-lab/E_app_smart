@@ -117,6 +117,10 @@ class _WordScrambleGameState extends State<WordScrambleGame> {
       Future.delayed(const Duration(seconds: 1), () {
         if(mounted) setState(() => _loadNewWord());
       });
+    } else if (!userLetters.contains('')) {
+      // If word is fully filled but wrong
+      Provider.of<UserProvider>(context, listen: false).logMistake(currentWord.id);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Incorrect. Try again! (Logged to clinic)'), backgroundColor: Colors.orange));
     }
   }
 
@@ -229,17 +233,23 @@ class _WordMatchGameState extends State<WordMatchGame> {
         selectedArabic = null;
 
         if (matchedWords.length == gameWords.length * 2) {
-           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('You won! Reseting game...'), backgroundColor: Colors.green));
+           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('You won! Resetting game...'), backgroundColor: Colors.green));
            Future.delayed(const Duration(seconds: 2), () {
              if(mounted) setState(() => _initGame());
            });
         }
       } else {
+        // Find the english word they selected to log the mistake
+        try {
+           final wrongWord = gameWords.firstWhere((w) => w.word == selectedEnglish);
+           Provider.of<UserProvider>(context, listen: false).logMistake(wrongWord.id);
+        } catch(_) {}
+
         setState(() {
           selectedEnglish = null;
           selectedArabic = null;
         });
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Wrong match!'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Wrong match! Logged to clinic.'), backgroundColor: Colors.red));
       }
     }
   }
@@ -347,10 +357,11 @@ class _TimeAttackGameState extends State<TimeAttackGame> {
   }
 
   void _checkAnswer(String selectedTranslation) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
     if (selectedTranslation == _currentWord.translation) {
       setState(() {
         _score += 5;
-        Provider.of<UserProvider>(context, listen: false).addXp(5);
+        userProvider.addXp(5);
       });
       _loadQuestion();
     } else {
@@ -358,6 +369,7 @@ class _TimeAttackGameState extends State<TimeAttackGame> {
         _timeLeft -= 5; // Penalty for wrong answer
         if(_timeLeft < 0) _timeLeft = 0;
       });
+      userProvider.logMistake(_currentWord.id);
     }
   }
 

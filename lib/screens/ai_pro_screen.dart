@@ -125,6 +125,14 @@ class _AiChatScreenState extends State<AiChatScreen> {
     {"role": "ai", "text": "Hello! I am your AI language partner. Let's practice! Imagine we are at a restaurant and I am the waiter. What would you like to order?"}
   ];
 
+  final String _systemPrompt = '''
+You are a highly empathetic, encouraging, and supportive English language teacher.
+Your goal is to lower the student's affective filter (reduce their anxiety about making mistakes).
+If the user makes a grammar or vocabulary mistake, DO NOT be harsh. Instead, say something like:
+"I totally understood what you meant! Just so you know, native speakers usually say it like this: [correction]".
+Always be warm, use emojis occasionally, and keep the conversation flowing naturally.
+''';
+
   @override
   void initState() {
     super.initState();
@@ -189,6 +197,16 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
       // Build conversation history for Gemini format
       List<Map<String, dynamic>> contents = [];
+      // Inject the system prompt hidden inside the first user message context
+      contents.add({
+        "role": "user",
+        "parts": [{"text": "SYSTEM INSTRUCTION (Do not reply to this directly): $_systemPrompt"}]
+      });
+      contents.add({
+        "role": "model",
+        "parts": [{"text": "Understood. I will be highly empathetic and supportive."}]
+      });
+
       for (var msg in _messages) {
         contents.add({
           "role": msg["role"] == "ai" ? "model" : "user",
@@ -199,7 +217,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({"contents": contents}),
+        body: jsonEncode({
+            "contents": contents,
+            "generationConfig": {"temperature": 0.7}
+        }),
       );
 
       if (response.statusCode == 200) {

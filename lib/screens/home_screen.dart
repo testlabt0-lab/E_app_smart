@@ -12,6 +12,7 @@ import 'story_reading_screen.dart';
 import 'translator_screen.dart';
 import 'grammar_checker_screen.dart';
 import 'ar_translator_screen.dart';
+import 'two_minute_rush_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -122,6 +123,36 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 Icon(Icons.arrow_forward_ios, color: theme.colorScheme.primary),
               ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+          // 2-Minute Rush Banner
+          GestureDetector(
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TwoMinuteRushScreen())),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [Color(0xFFF5576C), Color(0xFFF093FB)]),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [BoxShadow(color: Colors.red.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 5))],
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.bolt, color: Colors.white, size: 40),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('2-Minute Rush', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                        Text('Build your daily habit quickly!', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.play_circle_fill, color: Colors.white, size: 36),
+                ],
+              ),
             ),
           ),
 
@@ -238,6 +269,10 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 12),
           _buildToolCard(context, 'AR Camera Lens', 'Point at objects to learn', Icons.camera_alt, Colors.redAccent, () {
              Navigator.push(context, MaterialPageRoute(builder: (_) => const ArTranslatorScreen()));
+          }),
+          const SizedBox(height: 12),
+          _buildToolCard(context, 'Slangs & Idioms', 'Cultural immersion phrases', Icons.groups, Colors.pink, () {
+             Navigator.push(context, MaterialPageRoute(builder: (_) => const PhrasesScreen(showOnlySlangs: true)));
           }),
         ],
       ),
@@ -397,7 +432,8 @@ class CategoryWordsScreen extends StatelessWidget {
 }
 
 class PhrasesScreen extends StatefulWidget {
-  const PhrasesScreen({super.key});
+  final bool showOnlySlangs;
+  const PhrasesScreen({super.key, this.showOnlySlangs = false});
 
   @override
   State<PhrasesScreen> createState() => _PhrasesScreenState();
@@ -421,13 +457,17 @@ class _PhrasesScreenState extends State<PhrasesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final filteredPhrases = widget.showOnlySlangs
+      ? MockData.phrases.where((p) => p.context.toLowerCase().contains('idiom') || p.context.toLowerCase().contains('slang')).toList()
+      : MockData.phrases;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Quick Phrases')),
+      appBar: AppBar(title: Text(widget.showOnlySlangs ? 'Slangs & Idioms' : 'Quick Phrases')),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: MockData.phrases.length,
+        itemCount: filteredPhrases.length,
         itemBuilder: (context, index) {
-          final phrase = MockData.phrases[index];
+          final phrase = filteredPhrases[index];
           return Card(
             margin: const EdgeInsets.only(bottom: 16),
             child: Padding(
