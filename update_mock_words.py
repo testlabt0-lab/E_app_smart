@@ -1,147 +1,8 @@
-import '../models/models.dart';
+import re
 
-class MockData {
-  static List<Level> levels = [
-    Level(id: 'A1', name: 'Pre-A1 Beginner', colorHex: '0xFF4CAF50'),
-    Level(id: 'A2', name: 'A2 Elementary', colorHex: '0xFF8BC34A'),
-    Level(id: 'B1', name: 'B1 Intermediate', colorHex: '0xFFFFC107'),
-    Level(id: 'B2', name: 'B2 Upper Intermediate', colorHex: '0xFFFF9800'),
-    Level(id: 'C1', name: 'C1 Advanced', colorHex: '0xFFF44336'),
-    Level(id: 'C2', name: 'C2 Mastery', colorHex: '0xFF9C27B0'),
-  ];
+content = open('lib/data/mock_data.dart', 'r').read()
 
-  static List<Category> categories = [
-    Category(
-      id: 'tech',
-      name: 'تقنية',
-      icon: '💻',
-      subcategories: [
-        Subcategory(id: 'tech_prog', categoryId: 'tech', name: 'برمجة', icon: '👨‍💻'),
-        Subcategory(id: 'tech_cyber', categoryId: 'tech', name: 'أمن سيبراني', icon: '🛡️'),
-        Subcategory(id: 'tech_ai', categoryId: 'tech', name: 'ذكاء اصطناعي', icon: '🤖'),
-      ],
-    ),
-    Category(
-      id: 'health',
-      name: 'صحة وطب',
-      icon: '⚕️',
-      subcategories: [
-        Subcategory(id: 'health_anatomy', categoryId: 'health', name: 'تشريح', icon: '🦴'),
-        Subcategory(id: 'health_pharm', categoryId: 'health', name: 'صيدلة', icon: '💊'),
-      ],
-    ),
-    Category(id: 'business', name: 'أعمال', icon: '💼'),
-    Category(id: 'travel', name: 'سفر', icon: '✈️'),
-    Category(id: 'daily', name: 'حياة يومية', icon: '☀️'),
-    Category(
-      id: 'law',
-      name: 'قضاء وسياسة',
-      icon: '⚖️',
-      subcategories: [
-        Subcategory(id: 'law_court', categoryId: 'law', name: 'محاكم', icon: '🏛️'),
-        Subcategory(id: 'law_politics', categoryId: 'law', name: 'سياسة', icon: '🗳️'),
-      ],
-    ),
-    Category(
-      id: 'economy',
-      name: 'اقتصاد',
-      icon: '📈',
-    ),
-    Category(
-      id: 'food',
-      name: 'فواكه وخضار',
-      icon: '🍎',
-      subcategories: [
-        Subcategory(id: 'food_fruits', categoryId: 'food', name: 'فواكه', icon: '🍇'),
-        Subcategory(id: 'food_veg', categoryId: 'food', name: 'خضار', icon: '🥦'),
-      ],
-    ),
-    Category(
-      id: 'family',
-      name: 'العائلة',
-      icon: '👨‍👩‍👧‍👦',
-    ),
-    Category(
-      id: 'education',
-      name: 'التعليم',
-      icon: '🎓',
-    ),
-    Category(
-      id: 'sports',
-      name: 'الرياضة',
-      icon: '⚽',
-    ),
-    Category(
-      id: 'weather',
-      name: 'الطقس',
-      icon: '⛅',
-    ),
-    Category(
-      id: 'emotions',
-      name: 'المشاعر',
-      icon: '😊',
-    ),
-  ];
-
-  static List<Phrase> phrases = [
-    Phrase(id: 'p1', english: 'Could you please speak a bit slower?', arabic: 'هل يمكنك التحدث ببطء قليلاً من فضلك؟', context: 'عندما لا تفهم شخصاً يتحدث بسرعة.'),
-    Phrase(id: 'p2', english: 'I would like to order the daily special.', arabic: 'أود أن أطلب الطبق اليومي الخاص.', context: 'في المطعم عند الطلب.'),
-    Phrase(id: 'p3', english: 'How much does this cost?', arabic: 'كم سعر هذا؟', context: 'أثناء التسوق.'),
-    Phrase(id: 'p4', english: 'Can you help me find the nearest hospital?', arabic: 'هل يمكنك مساعدتي في العثور على أقرب مستشفى؟', context: 'في حالات الطوارئ أثناء السفر.'),
-    Phrase(id: 'p5', english: 'I appreciate your help.', arabic: 'أقدر مساعدتك.', context: 'لشكر شخص ما بلباقة.'),
-
-    // Slangs and Idioms for Cultural Immersion
-    Phrase(id: 's1', english: 'Piece of cake', arabic: 'سهل جداً (قطعة كيك)', context: 'Idiom: When something is very easy to do.'),
-    Phrase(id: 's2', english: 'Break a leg', arabic: 'حظاً موفقاً', context: 'Idiom: Used to wish someone good luck, especially before a performance.'),
-    Phrase(id: 's3', english: 'Bite the bullet', arabic: 'تجرع السم / واجه الصعوبة', context: 'Idiom: To endure a painful or otherwise unpleasant situation that is seen as unavoidable.'),
-    Phrase(id: 's4', english: 'Hang out', arabic: 'يقضي وقتاً / يتسكع', context: 'Slang: To spend time relaxing or socializing informally.'),
-    Phrase(id: 's5', english: 'Spill the beans', arabic: 'أفشِ السر', context: 'Idiom: To reveal secret information unintentionally or indiscreetly.'),
-  ];
-
-  static List<TongueTwister> tongueTwisters = [
-    TongueTwister(id: 't1', english: 'Peter Piper picked a peck of pickled peppers.', arabic: 'بيتر بايبر التقط كمية من الفلفل المخلل.'),
-    TongueTwister(id: 't2', english: 'She sells seashells by the seashore.', arabic: 'تبيع صدف البحر بجوار شاطئ البحر.'),
-    TongueTwister(id: 't3', english: 'I saw a kitten eating chicken in the kitchen.', arabic: 'رأيت قطة تأكل الدجاج في المطبخ.'),
-    TongueTwister(id: 't4', english: 'How can a clam cram in a clean cream can?', arabic: 'كيف يمكن لمحار أن يحشر نفسه في علبة كريمة نظيفة؟'),
-  ];
-
-  static List<MinimalPair> minimalPairs = [
-    MinimalPair(id: 'm1', word1: 'Park', word2: 'Bark', arabic1: 'حديقة', arabic2: 'ينبح'),
-    MinimalPair(id: 'm2', word1: 'Ship', word2: 'Sheep', arabic1: 'سفينة', arabic2: 'خروف'),
-    MinimalPair(id: 'm3', word1: 'Think', word2: 'Sink', arabic1: 'يفكر', arabic2: 'يغوص / حوض'),
-    MinimalPair(id: 'm4', word1: 'Fan', word2: 'Van', arabic1: 'مروحة', arabic2: 'شاحنة مغلقة'),
-  ];
-
-  static List<Story> stories = [
-    Story(
-      id: 's1',
-      title: 'A Day at the Park',
-      content: 'The sun was shining brightly in the sky. Children were playing on the swings while their parents sat on the benches. A small dog chased a red ball across the green grass. Everyone felt happy and relaxed in the beautiful weather.',
-      vocabulary: {
-        'brightly': 'بسطوع',
-        'swings': 'أراجيح',
-        'benches': 'مقاعد',
-        'chased': 'طارد',
-        'relaxed': 'مسترخٍ',
-      },
-    ),
-    Story(
-      id: 's2',
-      title: 'The Busy Airport',
-      content: 'The airport was crowded with travelers dragging heavy luggage. The departure board displayed flights to London, Tokyo, and Dubai. An announcement echoed through the speakers, reminding passengers to proceed to their boarding gates immediately.',
-      vocabulary: {
-        'crowded': 'مزدحم',
-        'dragging': 'يجر',
-        'luggage': 'أمتعة',
-        'departure': 'مغادرة',
-        'echoed': 'تردد صداه',
-        'passengers': 'ركاب',
-        'boarding': 'صعود (للطائرة)',
-      },
-    )
-  ];
-
-  static List<Word> words = [
+new_words_data = """  static List<Word> words = [
     Word(
       id: 'w1', word: 'Algorithm', translation: 'خوارزمية',
       usage: 'A process or set of rules to be followed in calculations or other problem-solving operations.',
@@ -171,7 +32,7 @@ class MockData {
       example: 'They are trying to negotiate a new contract.', emoji: '🤝',
       partOfSpeech: 'verb', v2: 'Negotiated', v3: 'Negotiated',
       synonyms: ['discuss', 'bargain'], antonyms: ['refuse'],
-      ipa: '/nəˈɡoʊ.ʃi.eɪt/', movieQuote: '"I am altering the deal. Pray I don\'t alter it any further." - Star Wars',
+      ipa: '/nəˈɡoʊ.ʃi.eɪt/', movieQuote: '"I am altering the deal. Pray I don\\'t alter it any further." - Star Wars',
       categoryId: 'business', levelId: 'C1',
     ),
     Word(
@@ -253,7 +114,7 @@ class MockData {
     Word(
       id: 'w_edu', word: 'Comprehend', translation: 'يستوعب/يفهم',
       usage: 'Grasp mentally; understand.',
-      example: 'He couldn\'t comprehend the complexity of the math problem.', emoji: '🧠',
+      example: 'He couldn\\'t comprehend the complexity of the math problem.', emoji: '🧠',
       partOfSpeech: 'verb', v2: 'Comprehended', v3: 'Comprehended',
       synonyms: ['understand', 'grasp'], antonyms: ['misunderstand'],
       ipa: '/ˌkɑːm.prəˈhend/', categoryId: 'education', levelId: 'B2',
@@ -301,10 +162,14 @@ class MockData {
     Word(
       id: 'w_verb_irr3', word: 'Forget', translation: 'ينسى',
       usage: 'Fail to remember.',
-      example: 'Don\'t forget your keys!', emoji: '🤷',
+      example: 'Don\\'t forget your keys!', emoji: '🤷',
       partOfSpeech: 'verb', v2: 'Forgot', v3: 'Forgotten',
       synonyms: ['blank', 'overlook'], antonyms: ['remember'],
       ipa: '/fɚˈɡet/', categoryId: 'emotions', levelId: 'A2',
     ),
   ];
-}
+}"""
+
+# Using regex to replace the entire words array block
+new_content = re.sub(r'  static List<Word> words = \[.*?\];\n\}', new_words_data, content, flags=re.DOTALL)
+open('lib/data/mock_data.dart', 'w').write(new_content)

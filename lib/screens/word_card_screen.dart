@@ -148,6 +148,21 @@ class _WordCardScreenState extends State<WordCardScreen> {
                 ),
               ),
             Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 8, bottom: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blue.withOpacity(0.5)),
+                ),
+                child: Text(
+                  widget.word.partOfSpeech.toUpperCase(),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blue),
+                ),
+              ),
+            ),
+            Center(
               child: Text(
                 widget.word.translation,
                 style: const TextStyle(fontSize: 24, color: Colors.grey),
@@ -177,6 +192,21 @@ class _WordCardScreenState extends State<WordCardScreen> {
             const SizedBox(height: 30),
             const Divider(),
             const SizedBox(height: 10),
+
+            if (widget.word.partOfSpeech.toLowerCase() == 'verb' && widget.word.v2.isNotEmpty) ...[
+              const Text('Verb Conjugations:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildVerbConjugation('V1 (Base)', widget.word.word),
+                  _buildVerbConjugation('V2 (Past)', widget.word.v2),
+                  _buildVerbConjugation('V3 (Participle)', widget.word.v3),
+                ],
+              ),
+              const SizedBox(height: 20),
+            ],
+
             const Text('Meaning:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             Text(widget.word.usage, style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 20),
@@ -245,6 +275,33 @@ class _WordCardScreenState extends State<WordCardScreen> {
               )
             ]
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVerbConjugation(String label, String verb) {
+    return Expanded(
+      child: Card(
+        color: Colors.indigo.withOpacity(0.05),
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: Colors.indigo.withOpacity(0.2))),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Text(label, style: const TextStyle(fontSize: 12, color: Colors.indigo)),
+              const SizedBox(height: 4),
+              Text(verb.isEmpty ? '-' : verb, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              if (verb.isNotEmpty)
+                IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: const Icon(Icons.volume_up, size: 16, color: Colors.indigo),
+                  onPressed: () => _speak(verb),
+                )
+            ],
+          ),
         ),
       ),
     );

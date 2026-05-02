@@ -8,7 +8,10 @@ class Word {
   final List<String> synonyms;
   final List<String> antonyms;
   final String ipa;
-  final String movieQuote; // Contextual movie quote bonus feature
+  final String movieQuote;
+  final String partOfSpeech; // e.g., Noun, Verb, Adjective
+  final String v2; // Past Simple (for verbs)
+  final String v3; // Past Participle (for verbs)
   final String categoryId;
   final String subcategoryId;
   final String levelId;
@@ -22,6 +25,9 @@ class Word {
     required this.emoji,
     this.ipa = '',
     this.movieQuote = '',
+    this.partOfSpeech = 'Noun',
+    this.v2 = '',
+    this.v3 = '',
     required this.synonyms,
     required this.antonyms,
     required this.categoryId,
@@ -39,6 +45,9 @@ class Word {
       emoji: json['emoji'],
       ipa: json['ipa'] ?? '',
       movieQuote: json['movieQuote'] ?? '',
+      partOfSpeech: json['partOfSpeech'] ?? 'Noun',
+      v2: json['v2'] ?? '',
+      v3: json['v3'] ?? '',
       synonyms: List<String>.from(json['synonyms']),
       antonyms: List<String>.from(json['antonyms']),
       categoryId: json['categoryId'],
@@ -57,6 +66,9 @@ class Word {
       'emoji': emoji,
       'ipa': ipa,
       'movieQuote': movieQuote,
+      'partOfSpeech': partOfSpeech,
+      'v2': v2,
+      'v3': v3,
       'synonyms': synonyms,
       'antonyms': antonyms,
       'categoryId': categoryId,
