@@ -112,6 +112,87 @@ class MockData {
     MinimalPair(id: 'm4', word1: 'Fan', word2: 'Van', arabic1: 'مروحة', arabic2: 'شاحنة مغلقة'),
   ];
 
+  static List<GrammarLesson> grammarLessons = [
+    GrammarLesson(
+      id: 'g1',
+      title: 'Present Simple (المضارع البسيط)',
+      levelId: 'A1',
+      summaryExplanation: '''نستخدم المضارع البسيط للتحدث عن العادات (Habits) والحقائق الثابتة (Facts).
+نضيف (s) للفعل مع (He, She, It).''',
+      detailedExplanation: '''زمن المضارع البسيط (Present Simple) هو من أهم الأزمنة في اللغة الإنجليزية.
+
+1. التكوين (Form):
+- مع الضمائر (I, You, We, They): نضع الفعل في المصدر بدون إضافات (Play, Eat).
+- مع الضمائر (He, She, It): نضع للفعل حرف (s) أو (es) مثل (Plays, Eats, Goes).
+
+2. النفي (Negative):
+- نستخدم (don't) مع (I, You, We, They).
+- نستخدم (doesn't) مع (He, She, It) ونعيد الفعل للمصدر.
+
+3. الاستخدام (Usage):
+- الحقائق العلمية: The sun rises in the east.
+- العادات اليومية: I wake up at 7 AM every day.''',
+      examples: [
+        'I play tennis every Friday. (عادة)',
+        'Water boils at 100 degrees. (حقيقة علمية)',
+        'She doesn\'t like coffee. (نفي)'
+      ],
+      aiPracticePrompt: 'I want to practice the Present Simple tense. Ask me questions about my daily routine and hobbies, and politely correct me if I use the wrong verb tense.',
+      quiz: [
+        GrammarQuizQuestion(
+          question: 'She ___ to school every day.',
+          options: ['go', 'goes', 'going', 'gone'],
+          correctAnswer: 'goes',
+          explanation: 'مع الضمير She في المضارع البسيط نضيف es للفعل.',
+        ),
+        GrammarQuizQuestion(
+          question: 'I ___ like playing football.',
+          options: ['don\'t', 'doesn\'t', 'not', 'isn\'t'],
+          correctAnswer: 'don\'t',
+          explanation: 'مع الضمير I نستخدم don\'t للنفي.',
+        ),
+      ]
+    ),
+    GrammarLesson(
+      id: 'g2',
+      title: 'Past Simple (الماضي البسيط)',
+      levelId: 'A2',
+      summaryExplanation: '''نستخدم الماضي البسيط للتحدث عن حدث انتهى في الماضي في وقت محدد.
+نضيف (ed) للفعل المنتظم، أو نستخدم التصريف الثاني للأفعال الشاذة.''',
+      detailedExplanation: '''الماضي البسيط (Past Simple) يُعبر عن أحداث وقعت وانتهت بالكامل.
+
+1. التكوين (Form):
+- الأفعال المنتظمة: نضيف لها (ed) مثل (Played, Worked).
+- الأفعال الشاذة: يتغير شكلها مثل (Go -> Went) و (See -> Saw).
+
+2. النفي (Negative):
+- نستخدم (didn't) مع جميع الضمائر، ويأتي بعدها الفعل في المصدر (بدون إضافات).
+
+3. كلمات دلالية:
+Yesterday, Last week, In 2010, Ago.''',
+      examples: [
+        'I visited my uncle last week. (فعل منتظم)',
+        'They went to Paris in 2015. (فعل شاذ)',
+        'He didn\'t watch the movie yesterday. (نفي ومصدر)'
+      ],
+      aiPracticePrompt: 'I want to practice the Past Simple tense. Ask me questions about what I did yesterday or during my last vacation, and correct my past tense verbs if I make mistakes.',
+      quiz: [
+        GrammarQuizQuestion(
+          question: 'We ___ a great movie yesterday.',
+          options: ['see', 'seeing', 'saw', 'seen'],
+          correctAnswer: 'saw',
+          explanation: 'الفعل see من الأفعال الشاذة، وتصريفه الثاني في الماضي هو saw.',
+        ),
+        GrammarQuizQuestion(
+          question: 'He didn\'t ___ his homework.',
+          options: ['finished', 'finishes', 'finish', 'finishing'],
+          correctAnswer: 'finish',
+          explanation: 'بعد didn\'t نستخدم دائماً الفعل في المصدر بدون أي إضافات.',
+        ),
+      ]
+    ),
+  ];
+
   static List<Story> stories = [
     Story(
       id: 's1',

@@ -106,6 +106,42 @@ class Category {
   });
 }
 
+class GrammarQuizQuestion {
+  final String question;
+  final List<String> options;
+  final String correctAnswer;
+  final String explanation;
+
+  GrammarQuizQuestion({
+    required this.question,
+    required this.options,
+    required this.correctAnswer,
+    required this.explanation,
+  });
+}
+
+class GrammarLesson {
+  final String id;
+  final String title;
+  final String levelId;
+  final String summaryExplanation;
+  final String detailedExplanation;
+  final List<String> examples;
+  final List<GrammarQuizQuestion> quiz;
+  final String aiPracticePrompt;
+
+  GrammarLesson({
+    required this.id,
+    required this.title,
+    required this.levelId,
+    required this.summaryExplanation,
+    required this.detailedExplanation,
+    required this.examples,
+    required this.quiz,
+    required this.aiPracticePrompt,
+  });
+}
+
 class Phrase {
   final String id;
   final String english;

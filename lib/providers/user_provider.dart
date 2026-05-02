@@ -11,6 +11,8 @@ class UserProvider with ChangeNotifier {
   List<Word> _customWords = [];
   List<String> _unlockedBadges = ['Newbie'];
   List<String> _mistakeWordIds = []; // The Mistake Clinic tracking
+  List<String> _unlockedGrammar = ['g1']; // Unlocked Grammar Lessons
+  List<SavedItem> _savedGrammarItems = []; // Grammar SRS tracking
   Map<DateTime, int> _activityHeatmap = {}; // Real Activity Heatmap tracking
   bool _isDarkMode = false;
   String _lastLoginDate = DateTime.now().toIso8601String().split('T')[0];
@@ -21,6 +23,8 @@ class UserProvider with ChangeNotifier {
   List<Word> get customWords => _customWords;
   List<String> get unlockedBadges => _unlockedBadges;
   List<String> get mistakeWordIds => _mistakeWordIds;
+  List<String> get unlockedGrammar => _unlockedGrammar;
+  List<SavedItem> get savedGrammarItems => _savedGrammarItems;
   Map<DateTime, int> get activityHeatmap => _activityHeatmap;
   bool get isDarkMode => _isDarkMode;
 
@@ -43,6 +47,10 @@ class UserProvider with ChangeNotifier {
 
     _unlockedBadges = prefs.getStringList('badges') ?? ['Newbie'];
     _mistakeWordIds = prefs.getStringList('mistakes') ?? [];
+    _unlockedGrammar = prefs.getStringList('unlocked_grammar') ?? ['g1'];
+
+    final savedGrammarJson = prefs.getStringList('savedGrammarItems') ?? [];
+    _savedGrammarItems = savedGrammarJson.map((e) => SavedItem.fromJson(json.decode(e))).toList();
 
     final heatmapJson = prefs.getString('heatmap');
     if (heatmapJson != null) {
@@ -171,6 +179,25 @@ class UserProvider with ChangeNotifier {
       notifyListeners();
       final prefs = await SharedPreferences.getInstance();
       prefs.setStringList('mistakes', _mistakeWordIds);
+    }
+  }
+
+  void unlockGrammarLesson(String lessonId) async {
+    if (!_unlockedGrammar.contains(lessonId)) {
+      _unlockedGrammar.add(lessonId);
+      notifyListeners();
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setStringList('unlocked_grammar', _unlockedGrammar);
+    }
+  }
+
+  void scheduleGrammarReview(String lessonId) async {
+    if (!_savedGrammarItems.any((item) => item.wordId == lessonId)) {
+      _savedGrammarItems.add(SavedItem(wordId: lessonId, interval: 3)); // initial review in 3 days
+      notifyListeners();
+      final prefs = await SharedPreferences.getInstance();
+      final jsonList = _savedGrammarItems.map((item) => json.encode(item.toJson())).toList();
+      prefs.setStringList('savedGrammarItems', jsonList);
     }
   }
 

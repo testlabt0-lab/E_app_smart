@@ -18,6 +18,7 @@ import 'adaptive_stories_screen.dart';
 import 'placement_test_screen.dart';
 import 'tongue_twister_screen.dart';
 import 'minimal_pairs_screen.dart';
+import 'grammar_path_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -285,6 +286,10 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 12),
           _buildToolCard(context, 'AR Camera Lens', 'Point at objects to learn', Icons.camera_alt, Colors.redAccent, () {
              Navigator.push(context, MaterialPageRoute(builder: (_) => const ArTranslatorScreen()));
+          }),
+          const SizedBox(height: 12),
+          _buildToolCard(context, 'Grammar Path', 'Learn Tenses & Rules', Icons.account_tree, Colors.green, () {
+             Navigator.push(context, MaterialPageRoute(builder: (_) => const GrammarPathScreen()));
           }),
           const SizedBox(height: 12),
           _buildToolCard(context, 'Placement Test', 'Find your exact level', Icons.school, Colors.green, () {

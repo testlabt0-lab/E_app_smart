@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../data/mock_data.dart';
 import '../models/models.dart';
+import 'sentence_builder_game.dart';
 
 class GamesScreen extends StatelessWidget {
   const GamesScreen({super.key});
@@ -35,6 +36,13 @@ class GamesScreen extends StatelessWidget {
             icon: Icons.timer,
             color: Colors.red,
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TimeAttackGame())),
+          ),
+          const SizedBox(height: 16),
+          GameCard(
+            title: 'Sentence Builder',
+            icon: Icons.extension,
+            color: Colors.purple,
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SentenceBuilderGame())),
           ),
         ],
       ),

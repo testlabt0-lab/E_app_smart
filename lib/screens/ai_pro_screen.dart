@@ -106,7 +106,9 @@ class AiProScreen extends StatelessWidget {
 }
 
 class AiChatScreen extends StatefulWidget {
-  const AiChatScreen({super.key});
+  final String? grammarContextPrompt;
+
+  const AiChatScreen({super.key, this.grammarContextPrompt});
 
   @override
   State<AiChatScreen> createState() => _AiChatScreenState();
@@ -121,17 +123,21 @@ class _AiChatScreenState extends State<AiChatScreen> {
   String _apiKey = '';
   bool _isListening = false;
 
-  final List<Map<String, String>> _messages = [
-    {"role": "ai", "text": "Hello! I am your AI language partner. Let's practice! Imagine we are at a restaurant and I am the waiter. What would you like to order?"}
-  ];
+  final List<Map<String, String>> _messages = [];
 
-  final String _systemPrompt = '''
+  String get _systemPrompt {
+    String base = '''
 You are a highly empathetic, encouraging, and supportive English language teacher.
 Your goal is to lower the student's affective filter (reduce their anxiety about making mistakes).
 If the user makes a grammar or vocabulary mistake, DO NOT be harsh. Instead, say something like:
 "I totally understood what you meant! Just so you know, native speakers usually say it like this: [correction]".
 Always be warm, use emojis occasionally, and keep the conversation flowing naturally.
 ''';
+    if (widget.grammarContextPrompt != null) {
+      base += '\n\nIMPORTANT CONTEXT FOR THIS SESSION: ${widget.grammarContextPrompt}';
+    }
+    return base;
+  }
 
   @override
   void initState() {
@@ -139,6 +145,12 @@ Always be warm, use emojis occasionally, and keep the conversation flowing natur
     _speech = stt.SpeechToText();
     _initTts();
     _loadApiKey();
+
+    if (widget.grammarContextPrompt != null) {
+       _messages.add({"role": "ai", "text": "Hello! Let's practice what you just learned. Are you ready?"});
+    } else {
+       _messages.add({"role": "ai", "text": "Hello! I am your AI language partner. Let's practice! Imagine we are at a restaurant and I am the waiter. What would you like to order?"});
+    }
   }
 
   void _initTts() async {
