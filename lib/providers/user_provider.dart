@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart'; // Commented out to prevent crashes without Firebase initialization
 import '../models/models.dart';
+import '../services/database_helper.dart';
 
 class UserProvider with ChangeNotifier {
   int _xp = 0;
@@ -38,25 +39,21 @@ class UserProvider with ChangeNotifier {
     _streak = prefs.getInt('streak') ?? 0;
     _isDarkMode = prefs.getBool('isDarkMode') ?? false;
     _lastLoginDate = prefs.getString('lastLoginDate') ?? DateTime.now().toIso8601String().split('T')[0];
-
-    final savedItemsJson = prefs.getStringList('savedItems') ?? [];
-    _savedItems = savedItemsJson.map((e) => SavedItem.fromJson(json.decode(e))).toList();
-
-    final customWordsJson = prefs.getStringList('customWords') ?? [];
-    _customWords = customWordsJson.map((e) => Word.fromJson(json.decode(e))).toList();
-
     _unlockedBadges = prefs.getStringList('badges') ?? ['Newbie'];
-    _mistakeWordIds = prefs.getStringList('mistakes') ?? [];
     _unlockedGrammar = prefs.getStringList('unlocked_grammar') ?? ['g1'];
-
-    final savedGrammarJson = prefs.getStringList('savedGrammarItems') ?? [];
-    _savedGrammarItems = savedGrammarJson.map((e) => SavedItem.fromJson(json.decode(e))).toList();
 
     final heatmapJson = prefs.getString('heatmap');
     if (heatmapJson != null) {
       final decodedMap = json.decode(heatmapJson) as Map<String, dynamic>;
       _activityHeatmap = decodedMap.map((key, value) => MapEntry(DateTime.parse(key), value as int));
     }
+
+    // Load massive/complex data via SQLite
+    final dbHelper = DatabaseHelper.instance;
+    _customWords = await dbHelper.readAllCustomWords();
+    _savedItems = await dbHelper.readAllSrs();
+    _mistakeWordIds = await dbHelper.readAllMistakes();
+    _savedGrammarItems = await dbHelper.readAllGrammarSrs();
 
     _checkStreak();
     notifyListeners();
@@ -135,16 +132,17 @@ class UserProvider with ChangeNotifier {
 
   void saveWord(String wordId) async {
     if (!_savedItems.any((item) => item.wordId == wordId)) {
-      _savedItems.add(SavedItem(wordId: wordId));
+      final item = SavedItem(wordId: wordId);
+      _savedItems.add(item);
       notifyListeners();
-      _saveItemsToPrefs();
+      await DatabaseHelper.instance.upsertSrs(item);
     }
   }
 
   void removeSavedWord(String wordId) async {
     _savedItems.removeWhere((item) => item.wordId == wordId);
     notifyListeners();
-    _saveItemsToPrefs();
+    await DatabaseHelper.instance.deleteSrs(wordId);
   }
 
   void updateReview(String wordId, bool isCorrect) async {
@@ -153,14 +151,14 @@ class UserProvider with ChangeNotifier {
       final item = _savedItems[index];
       if (isCorrect) {
         item.interval *= 2;
-        removeMistake(wordId); // Remove from clinic if they got it right
+        removeMistake(wordId);
       } else {
         item.interval = 1;
-        logMistake(wordId); // Add to clinic if they got it wrong
+        logMistake(wordId);
       }
       item.nextReviewDate = DateTime.now().add(Duration(days: item.interval));
       notifyListeners();
-      _saveItemsToPrefs();
+      await DatabaseHelper.instance.upsertSrs(item);
     }
   }
 
@@ -168,8 +166,7 @@ class UserProvider with ChangeNotifier {
     if (!_mistakeWordIds.contains(wordId)) {
       _mistakeWordIds.add(wordId);
       notifyListeners();
-      final prefs = await SharedPreferences.getInstance();
-      prefs.setStringList('mistakes', _mistakeWordIds);
+      await DatabaseHelper.instance.addMistake(wordId);
     }
   }
 
@@ -177,8 +174,7 @@ class UserProvider with ChangeNotifier {
     if (_mistakeWordIds.contains(wordId)) {
       _mistakeWordIds.remove(wordId);
       notifyListeners();
-      final prefs = await SharedPreferences.getInstance();
-      prefs.setStringList('mistakes', _mistakeWordIds);
+      await DatabaseHelper.instance.removeMistake(wordId);
     }
   }
 
@@ -193,36 +189,23 @@ class UserProvider with ChangeNotifier {
 
   void scheduleGrammarReview(String lessonId) async {
     if (!_savedGrammarItems.any((item) => item.wordId == lessonId)) {
-      _savedGrammarItems.add(SavedItem(wordId: lessonId, interval: 3)); // initial review in 3 days
+      final item = SavedItem(wordId: lessonId, interval: 3);
+      _savedGrammarItems.add(item);
       notifyListeners();
-      final prefs = await SharedPreferences.getInstance();
-      final jsonList = _savedGrammarItems.map((item) => json.encode(item.toJson())).toList();
-      prefs.setStringList('savedGrammarItems', jsonList);
+      await DatabaseHelper.instance.upsertGrammarSrs(item);
     }
   }
 
   void addCustomWord(Word word) async {
     _customWords.add(word);
     notifyListeners();
-    _saveCustomWordsToPrefs();
+    await DatabaseHelper.instance.createCustomWord(word);
   }
 
   void removeCustomWord(String wordId) async {
     _customWords.removeWhere((item) => item.id == wordId);
     notifyListeners();
-    _saveCustomWordsToPrefs();
-  }
-
-  Future<void> _saveItemsToPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonList = _savedItems.map((item) => json.encode(item.toJson())).toList();
-    prefs.setStringList('savedItems', jsonList);
-  }
-
-  Future<void> _saveCustomWordsToPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonList = _customWords.map((item) => json.encode(item.toJson())).toList();
-    prefs.setStringList('customWords', jsonList);
+    await DatabaseHelper.instance.deleteCustomWord(wordId);
   }
 
   // --- Mock Cloud Sync Implementation (Safe Fallback) ---
